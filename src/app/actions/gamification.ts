@@ -75,12 +75,26 @@ export async function getGamificationProfile(): Promise<GamificationProfileRespo
       .eq("user_id", user.id);
   }
 
-  // 2. Fetch all badges from database (or fallback to KNOWN_BADGES)
+  // 2. Fetch all badges from database and sync missing badges
   const { data: dbBadges } = await supabase
     .from("badges")
     .select("*");
 
-  const badgeCatalog = dbBadges && dbBadges.length > 0 ? dbBadges : KNOWN_BADGES;
+  const existingDbBadgeIds = new Set((dbBadges || []).map((b) => b.id));
+  const missingBadges = KNOWN_BADGES.filter((kb) => !existingDbBadgeIds.has(kb.id));
+
+  if (missingBadges.length > 0) {
+    try {
+      await supabase.from("badges").upsert(missingBadges, { onConflict: "id" });
+    } catch (e) {
+      console.warn("Could not upsert missing badges:", e);
+    }
+  }
+
+  const badgeCatalog = KNOWN_BADGES.map((kb) => {
+    const fromDb = (dbBadges || []).find((b) => b.id === kb.id);
+    return fromDb || kb;
+  });
 
   // 3. Fetch user's unlocked badges
   const { data: userBadges } = await supabase

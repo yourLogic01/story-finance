@@ -3,8 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { createTransactionSchema } from "@/lib/validations/transaction";
 import { calculateStreak } from "@/lib/gamification/streak";
-import { DAILY_LOG_BASE_XP, getLevelInfo } from "@/lib/gamification/xp";
-import { evaluateEligibleBadges } from "@/lib/gamification/badges";
+import { calculateDailyLogXp, getLevelInfo } from "@/lib/gamification/xp";
+import { evaluateEligibleBadges, KNOWN_BADGES } from "@/lib/gamification/badges";
 import { revalidatePath } from "next/cache";
 
 export async function createTransaction(formData: unknown) {
@@ -84,23 +84,41 @@ export async function createTransaction(formData: unknown) {
         profile.longest_streak
       );
 
-      // Base daily logging XP reward (+10 XP per day)
+      // Base daily logging XP reward (with x2 multiplier after 7 days streak!)
       if (streakResult.isNewDayLog) {
-        awardedXp += DAILY_LOG_BASE_XP;
+        const xpReward = calculateDailyLogXp(streakResult.newStreak);
+        awardedXp += xpReward.xp;
       }
 
       let currentTotalXp = profile.total_xp + awardedXp;
 
-      // 2b. Count total transactions to evaluate badges
+      // 2b. Check context metrics for badges
       const { count: txCount } = await supabase
         .from("transactions")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id);
 
+      const { data: incomeTx } = await supabase
+        .from("transactions")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("type", "income")
+        .limit(1)
+        .maybeSingle();
+
+      const { data: userBudget } = await supabase
+        .from("budgets")
+        .select("id")
+        .eq("user_id", user.id)
+        .limit(1)
+        .maybeSingle();
+
       // 2c. Evaluate eligible badges
       const eligibleBadgeIds = evaluateEligibleBadges({
         totalTransactions: txCount || 1,
         currentStreak: streakResult.newStreak,
+        hasIncomeTransaction: Boolean(incomeTx) || type === "income",
+        hasBudgetConfigured: Boolean(userBudget),
       });
 
       for (const badgeId of eligibleBadgeIds) {
@@ -112,11 +130,20 @@ export async function createTransaction(formData: unknown) {
           .maybeSingle();
 
         if (!existingBadge) {
-          const { data: badgeInfo } = await supabase
+          let { data: badgeInfo } = await supabase
             .from("badges")
             .select("*")
             .eq("id", badgeId)
             .maybeSingle();
+
+          // If badge record is not yet inserted in DB, upsert from catalog
+          if (!badgeInfo) {
+            const known = KNOWN_BADGES.find((kb) => kb.id === badgeId);
+            if (known) {
+              await supabase.from("badges").upsert(known, { onConflict: "id" });
+              badgeInfo = known;
+            }
+          }
 
           if (badgeInfo) {
             await supabase.from("user_badges").insert({
