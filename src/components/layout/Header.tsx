@@ -1,7 +1,9 @@
 "use client";
 
-import { Flame, Wallet } from "lucide-react";
+import { Wallet } from "lucide-react";
 import Link from "next/link";
+import { RetroStreakFlame } from "@/components/retro/RetroStreakFlame";
+import { RetroXpBar } from "@/components/retro/RetroXpBar";
 
 interface HeaderProps {
   currentStreak?: number;
@@ -27,15 +29,8 @@ export function Header({ currentStreak = 0, totalXp = 0 }: HeaderProps) {
 
       {/* Gamification Stats: Streak Flame & XP Badge */}
       <div className="flex items-center gap-2">
-        <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200/60 text-amber-700 shadow-sm">
-          <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-          <span className="font-pixel text-[10px]">{currentStreak}</span>
-        </div>
-
-        <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 shadow-sm">
-          <span className="text-[10px] font-bold">XP</span>
-          <span className="font-pixel text-[10px]">{totalXp}</span>
-        </div>
+        <RetroStreakFlame streak={currentStreak} size="sm" href="/profile" />
+        <RetroXpBar totalXp={totalXp} variant="header" href="/profile" />
       </div>
     </header>
   );

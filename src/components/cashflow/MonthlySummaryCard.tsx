@@ -1,9 +1,10 @@
 "use client";
 
-import { Wallet, TrendingUp, TrendingDown, Smile, Meh, AlertCircle } from "lucide-react";
+import { Wallet, TrendingUp, TrendingDown } from "lucide-react";
 import { formatIDR } from "@/lib/utils/currency";
 import { getMonthName } from "@/lib/utils/date";
 import { MonthlySummary } from "@/types";
+import { RetroMoodAvatar } from "@/components/retro/RetroMoodAvatar";
 
 interface MonthlySummaryCardProps {
   summary: MonthlySummary;
@@ -18,21 +19,16 @@ export function MonthlySummaryCard({ summary }: MonthlySummaryCardProps) {
     happy: {
       label: "SEHAT",
       color: "text-emerald-400 bg-emerald-950/60 border-emerald-800",
-      icon: Smile,
     },
     neutral: {
       label: "STABIL",
       color: "text-sky-400 bg-sky-950/60 border-sky-800",
-      icon: Meh,
     },
     worried: {
       label: "DEFISIT",
       color: "text-rose-400 bg-rose-950/60 border-rose-800",
-      icon: AlertCircle,
     },
   }[summary.financialMood];
-
-  const MoodIcon = moodConfig.icon;
 
   return (
     <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-retro border border-slate-900 relative overflow-hidden">
@@ -46,11 +42,11 @@ export function MonthlySummaryCard({ summary }: MonthlySummaryCardProps) {
           <span>Saldo {monthName} {summary.year}</span>
         </span>
         <div className="flex items-center gap-1.5">
+          <RetroMoodAvatar mood={summary.financialMood} size="sm" />
           <span
-            className={`text-[9px] font-pixel px-2 py-0.5 rounded border flex items-center gap-1 ${moodConfig.color}`}
+            className={`text-[9px] font-pixel px-2 py-0.5 rounded border ${moodConfig.color}`}
           >
-            <MoodIcon className="w-3 h-3" />
-            <span>{moodConfig.label}</span>
+            {moodConfig.label}
           </span>
         </div>
       </div>
