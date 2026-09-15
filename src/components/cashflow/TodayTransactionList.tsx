@@ -59,8 +59,8 @@ export function TodayTransactionList({ transactions }: TodayTransactionListProps
             <p className="text-xs text-slate-500 font-medium">
               Belum ada transaksi hari ini.
             </p>
-            <p className="text-[11px] text-emerald-600 mt-1 font-semibold">
-              Ketuk tombol (+) untuk catat jajan pertamamu & raih streak! 🔥
+            <p className="text-[11px] text-slate-400 mt-1">
+              Ketuk tombol (+) di bawah untuk mencatat.
             </p>
           </div>
         ) : (

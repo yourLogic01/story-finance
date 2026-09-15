@@ -7,7 +7,7 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { QuickAddModal } from "@/components/cashflow/QuickAddModal";
 import { TodayTransactionList } from "@/components/cashflow/TodayTransactionList";
 import { Category, TransactionWithCategory, GamificationProfile } from "@/types";
-import { Plus, Sparkles, TrendingUp, TrendingDown, Wallet } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { formatIDR } from "@/lib/utils/currency";
 
 interface DashboardViewProps {
@@ -88,17 +88,14 @@ export function DashboardView({
           </div>
         </div>
 
-        {/* Quick Add Big Action Trigger */}
+        {/* Quick Add Action Trigger */}
         <button
           type="button"
           onClick={() => setIsQuickAddOpen(true)}
-          className="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
+          className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
         >
-          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-            <Plus className="w-4 h-4 text-white" />
-          </div>
-          <span>Catat Pengeluaran / Jajan Sekarang</span>
-          <Sparkles className="w-3.5 h-3.5 text-emerald-300 ml-1" />
+          <Plus className="w-4 h-4" />
+          <span>Catat Transaksi</span>
         </button>
 
         {/* Today's Transactions Feed */}
