@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { DashboardView } from "@/components/cashflow/DashboardView";
 import { Category, TransactionWithCategory, GamificationProfile } from "@/types";
 import { getTodayDateString, getCurrentMonthYear } from "@/lib/utils/date";
+import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -11,7 +12,7 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return null;
+    redirect("/login");
   }
 
   const todayStr = getTodayDateString();
