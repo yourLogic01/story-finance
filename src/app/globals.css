@@ -75,6 +75,9 @@
   * {
     @apply border-border;
   }
+  html {
+    overflow-y: scroll;
+  }
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
@@ -112,4 +115,15 @@
 .retro-button:active {
   transform: translate(1px, 1px);
   box-shadow: 1px 1px 0px #0f172a;
+}
+
+/* Force override react-remove-scroll / Radix UI modal scrollbar locking to eliminate layout shift */
+html body[data-scroll-locked],
+body[data-scroll-locked] {
+  margin-right: 0px !important;
+  margin-left: 0px !important;
+  padding-right: 0px !important;
+  padding-left: 0px !important;
+  overflow: visible !important;
+  --removed-body-scroll-bar-size: 0px !important;
 }

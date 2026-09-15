@@ -114,13 +114,11 @@ export function QuickAddModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md p-5 rounded-2xl">
-        <DialogHeader className="pb-2">
-          <DialogTitle className="text-base font-bold flex items-center justify-between">
-            <span>Catat Transaksi Cepat</span>
-            <span className="text-[10px] font-pixel text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-              FAST ENTRY
-            </span>
+      <DialogContent className="w-[calc(100%-2rem)] max-w-[400px] p-5 rounded-2xl">
+        <DialogHeader className="pb-2 pr-8 text-left">
+          <DialogTitle className="text-xs font-pixel tracking-wider text-slate-800 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>FAST ENTRY</span>
           </DialogTitle>
         </DialogHeader>
 

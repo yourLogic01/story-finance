@@ -20,7 +20,7 @@ export function Header({ currentStreak = 0, totalXp = 0 }: HeaderProps) {
             Story Finance
           </span>
           <span className="text-[10px] text-slate-500 font-medium block leading-tight">
-            Cashflow & Self-Reward
+            Cashflow
           </span>
         </div>
       </Link>
