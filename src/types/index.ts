@@ -1,12 +1,72 @@
-import { Database } from "./database.types";
+export interface Profile {
+  id: string;
+  email: string;
+  display_name: string | null;
+  currency: string;
+  created_at: string;
+  updated_at: string;
+}
 
-export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
-export type Category = Database["public"]["Tables"]["categories"]["Row"];
-export type Transaction = Database["public"]["Tables"]["transactions"]["Row"];
-export type Budget = Database["public"]["Tables"]["budgets"]["Row"];
-export type GamificationProfile = Database["public"]["Tables"]["gamification_profiles"]["Row"];
-export type Badge = Database["public"]["Tables"]["badges"]["Row"];
-export type UserBadge = Database["public"]["Tables"]["user_badges"]["Row"];
+export interface Category {
+  id: string;
+  user_id: string | null;
+  name: string;
+  type: "income" | "expense";
+  icon: string;
+  color: string;
+  is_default: boolean;
+  created_at: string;
+}
+
+export interface Transaction {
+  id: string;
+  user_id: string;
+  category_id: string;
+  type: "income" | "expense";
+  amount: number;
+  date: string;
+  note: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Budget {
+  id: string;
+  user_id: string;
+  category_id: string | null;
+  month: number;
+  year: number;
+  calculation_mode: "fixed" | "percentage";
+  target_value: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GamificationProfile {
+  id: string;
+  user_id: string;
+  current_streak: number;
+  longest_streak: number;
+  total_xp: number;
+  current_level: number;
+  last_logged_date: string | null;
+  updated_at: string;
+}
+
+export interface Badge {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  xp_reward: number;
+}
+
+export interface UserBadge {
+  id: string;
+  user_id: string;
+  badge_id: string;
+  unlocked_at: string;
+}
 
 export type TransactionType = "income" | "expense";
 export type BudgetMode = "fixed" | "percentage";

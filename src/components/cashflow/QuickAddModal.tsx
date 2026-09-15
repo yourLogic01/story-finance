@@ -1,0 +1,271 @@
+"use client";
+
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { CategorySelector } from "./CategorySelector";
+import { Category } from "@/types";
+import { createTransaction } from "@/app/actions/transactions";
+import { getTodayDateString } from "@/lib/utils/date";
+import { formatIDR, parseIDRInput } from "@/lib/utils/currency";
+import { Flame, Sparkles, Check } from "lucide-react";
+
+interface QuickAddModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  categories: Category[];
+  onSuccess?: () => void;
+}
+
+export function QuickAddModal({
+  isOpen,
+  onClose,
+  categories,
+  onSuccess,
+}: QuickAddModalProps) {
+  const [type, setType] = useState<"expense" | "income">("expense");
+  const [rawAmount, setRawAmount] = useState<string>("");
+  const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [note, setNote] = useState<string>("");
+  const [date, setDate] = useState<string>(getTodayDateString());
+  const [loading, setLoading] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Gamification celebration popover state
+  const [rewardCelebration, setRewardCelebration] = useState<{
+    xp: number;
+    badge?: { id: string; title: string; icon: string } | null;
+  } | null>(null);
+
+  // Filter categories by active type (expense or income)
+  const filteredCategories = categories.filter((c) => c.type === type);
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    const parsed = parseIDRInput(val);
+    setRawAmount(parsed > 0 ? String(parsed) : "");
+  };
+
+  const addQuickNominal = (additional: number) => {
+    const current = parseIDRInput(rawAmount);
+    setRawAmount(String(current + additional));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const amountNum = parseIDRInput(rawAmount);
+
+    if (amountNum <= 0) {
+      setErrorMsg("Masukkan nominal yang valid");
+      return;
+    }
+
+    if (!categoryId) {
+      setErrorMsg("Pilih salah satu kategori");
+      return;
+    }
+
+    setLoading(true);
+    setErrorMsg(null);
+
+    const result = await createTransaction({
+      amount: amountNum,
+      type,
+      categoryId,
+      date,
+      note: note.trim() || null,
+    });
+
+    setLoading(false);
+
+    if (!result.success) {
+      setErrorMsg(result.error || "Gagal mencatat transaksi");
+    } else {
+      // Trigger celebration if XP or badge unlocked
+      if (result.gamification?.awardedXp || result.gamification?.unlockedBadge) {
+        setRewardCelebration({
+          xp: result.gamification.awardedXp,
+          badge: result.gamification.unlockedBadge,
+        });
+
+        setTimeout(() => {
+          setRewardCelebration(null);
+          resetForm();
+          onClose();
+          onSuccess?.();
+        }, 1800);
+      } else {
+        resetForm();
+        onClose();
+        onSuccess?.();
+      }
+    }
+  };
+
+  const resetForm = () => {
+    setRawAmount("");
+    setCategoryId(null);
+    setNote("");
+    setDate(getTodayDateString());
+    setErrorMsg(null);
+    setRewardCelebration(null);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-md p-5 rounded-2xl">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-base font-bold flex items-center justify-between">
+            <span>Catat Transaksi Cepat</span>
+            <span className="text-[10px] font-pixel text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              FAST ENTRY
+            </span>
+          </DialogTitle>
+        </DialogHeader>
+
+        {rewardCelebration ? (
+          <div className="py-8 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 rounded-2xl bg-amber-400 border-2 border-slate-900 shadow-retro flex items-center justify-center mb-3 animate-bounce">
+              <Flame className="w-9 h-9 text-slate-950 fill-amber-300" />
+            </div>
+            <h4 className="font-pixel text-xs text-slate-900 mb-1">
+              TRANSAKSI TERCATAT!
+            </h4>
+            <p className="text-xs text-emerald-600 font-bold mb-2">
+              +{rewardCelebration.xp} XP Didapatkan!
+            </p>
+            {rewardCelebration.badge && (
+              <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-600" />
+                <span>Badge Baru: <strong>{rewardCelebration.badge.title}</strong>!</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {errorMsg && (
+              <div className="p-2.5 text-xs bg-rose-50 border border-rose-200 text-rose-600 rounded-lg">
+                {errorMsg}
+              </div>
+            )}
+
+            {/* Type Selector Toggle: Pengeluaran vs Pemasukan */}
+            <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-xl">
+              <button
+                type="button"
+                onClick={() => {
+                  setType("expense");
+                  setCategoryId(null);
+                }}
+                className={`py-2 text-xs font-bold rounded-lg transition-all ${
+                  type === "expense"
+                    ? "bg-rose-500 text-white shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Pengeluaran
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setType("income");
+                  setCategoryId(null);
+                }}
+                className={`py-2 text-xs font-bold rounded-lg transition-all ${
+                  type === "income"
+                    ? "bg-emerald-500 text-white shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Pemasukan
+              </button>
+            </div>
+
+            {/* Amount input */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600">Nominal (Rp)</label>
+              <div className="relative">
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="0"
+                  value={rawAmount ? formatIDR(parseInt(rawAmount, 10)) : ""}
+                  onChange={handleAmountChange}
+                  className="text-lg font-bold pl-3 h-12"
+                  autoFocus
+                  required
+                />
+              </div>
+              {/* Quick Nominal Pills for Fast Tap */}
+              <div className="flex gap-1.5 overflow-x-auto py-1 scrollbar-none">
+                {[10000, 25000, 50000, 100000].map((nominal) => (
+                  <button
+                    key={nominal}
+                    type="button"
+                    onClick={() => addQuickNominal(nominal)}
+                    className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 whitespace-nowrap active:scale-95 transition-transform"
+                  >
+                    +{nominal / 1000}k
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Category Selector */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600">Pilih Kategori</label>
+              <CategorySelector
+                categories={filteredCategories}
+                selectedId={categoryId}
+                onSelect={(id) => setCategoryId(id)}
+              />
+            </div>
+
+            {/* Note & Date */}
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <div className="space-y-1">
+                <label className="text-[11px] font-medium text-slate-500">Catatan (Opsional)</label>
+                <Input
+                  type="text"
+                  placeholder="Misal: Jajan boba"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  className="text-xs h-9"
+                  maxLength={100}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[11px] font-medium text-slate-500">Tanggal</label>
+                <Input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="text-xs h-9"
+                />
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className={`w-full font-bold h-11 ${
+                type === "expense"
+                  ? "bg-rose-600 hover:bg-rose-700"
+                  : "bg-emerald-600 hover:bg-emerald-700"
+              }`}
+            >
+              {loading ? (
+                "Menyimpan..."
+              ) : (
+                <span className="flex items-center gap-1.5">
+                  <Check className="w-4 h-4" /> Simpan Transaksi
+                </span>
+              )}
+            </Button>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
