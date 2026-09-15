@@ -6,25 +6,27 @@ import { Header } from "@/components/layout/Header";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { QuickAddModal } from "@/components/cashflow/QuickAddModal";
 import { TodayTransactionList } from "@/components/cashflow/TodayTransactionList";
-import { Category, TransactionWithCategory, GamificationProfile } from "@/types";
-import { Plus, TrendingUp, TrendingDown, Wallet } from "lucide-react";
-import { formatIDR } from "@/lib/utils/currency";
+import { MonthlySummaryCard } from "@/components/cashflow/MonthlySummaryCard";
+import { CategoryBreakdown } from "@/components/cashflow/CategoryBreakdown";
+import {
+  Category,
+  TransactionWithCategory,
+  GamificationProfile,
+  MonthlySummary,
+} from "@/types";
+import { Plus } from "lucide-react";
 
 interface DashboardViewProps {
   categories: Category[];
   todayTransactions: TransactionWithCategory[];
-  monthlyStats: {
-    income: number;
-    expense: number;
-    net: number;
-  };
+  monthlySummary: MonthlySummary;
   gamification: GamificationProfile | null;
 }
 
 export function DashboardView({
   categories,
   todayTransactions,
-  monthlyStats,
+  monthlySummary,
   gamification,
 }: DashboardViewProps) {
   const router = useRouter();
@@ -43,50 +45,8 @@ export function DashboardView({
       />
 
       <main className="flex-1 p-4 space-y-4 max-w-md mx-auto w-full">
-        {/* Monthly Balance Snapshot Card */}
-        <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-retro border border-slate-900 relative overflow-hidden">
-          <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-emerald-500/10 pointer-events-none" />
-
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-medium text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-              <Wallet className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Sisa Saldo Bulan Ini</span>
-            </span>
-            <span className="text-[10px] font-pixel text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800">
-              CASHFLOW
-            </span>
-          </div>
-
-          <h3 className="text-2xl font-bold font-pixel tracking-tight mb-4 text-emerald-400">
-            {formatIDR(monthlyStats.net)}
-          </h3>
-
-          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-700/60">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                <TrendingUp className="w-3.5 h-3.5" />
-              </div>
-              <div>
-                <span className="text-[10px] text-slate-400 block leading-tight">Pemasukan</span>
-                <span className="text-xs font-bold text-slate-100 leading-tight">
-                  {formatIDR(monthlyStats.income)}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
-                <TrendingDown className="w-3.5 h-3.5" />
-              </div>
-              <div>
-                <span className="text-[10px] text-slate-400 block leading-tight">Pengeluaran</span>
-                <span className="text-xs font-bold text-slate-100 leading-tight">
-                  {formatIDR(monthlyStats.expense)}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Monthly Summary Card (T029) */}
+        <MonthlySummaryCard summary={monthlySummary} />
 
         {/* Quick Add Action Trigger */}
         <button
@@ -94,12 +54,18 @@ export function DashboardView({
           onClick={() => setIsQuickAddOpen(true)}
           className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
         >
-          <Plus className="w-4 h-4" />
-          <span>Catat Transaksi</span>
+          <Plus className="w-4 h-4 stroke-[2.5]" />
+          <span>Catat Pengeluaran / Jajan Sekarang</span>
         </button>
 
         {/* Today's Transactions Feed */}
         <TodayTransactionList transactions={todayTransactions} />
+
+        {/* Category Breakdown (T030) */}
+        <CategoryBreakdown
+          breakdowns={monthlySummary.categoryBreakdowns}
+          totalExpenses={monthlySummary.totalExpenses}
+        />
       </main>
 
       {/* Quick Add Modal */}

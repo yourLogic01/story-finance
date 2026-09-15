@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { DashboardView } from "@/components/cashflow/DashboardView";
 import { Category, TransactionWithCategory, GamificationProfile } from "@/types";
 import { getTodayDateString, getCurrentMonthYear } from "@/lib/utils/date";
+import { getMonthlySummary } from "@/app/actions/summary";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
@@ -36,36 +37,8 @@ export default async function DashboardPage() {
 
   const todayTransactions = (rawTodayTx || []) as TransactionWithCategory[];
 
-  // 3. Fetch Monthly Stats
-  // Date range for current month
-  const startOfMonth = `${year}-${String(month).padStart(2, "0")}-01`;
-  const nextMonthYear = month === 12 ? year + 1 : year;
-  const nextMonth = month === 12 ? 1 : month + 1;
-  const startOfNextMonth = `${nextMonthYear}-${String(nextMonth).padStart(2, "0")}-01`;
-
-  const { data: monthTx } = await supabase
-    .from("transactions")
-    .select("type, amount")
-    .eq("user_id", user.id)
-    .gte("date", startOfMonth)
-    .lt("date", startOfNextMonth);
-
-  let totalIncome = 0;
-  let totalExpense = 0;
-
-  const monthTxList = (monthTx || []) as Array<{
-    type: "income" | "expense";
-    amount: number;
-  }>;
-
-  for (const tx of monthTxList) {
-    const val = Number(tx.amount);
-    if (tx.type === "income") {
-      totalIncome += val;
-    } else {
-      totalExpense += val;
-    }
-  }
+  // 3. Fetch Monthly Summary
+  const monthlySummary = await getMonthlySummary(year, month);
 
   // 4. Fetch Gamification Profile
   const { data: gamification } = await supabase
@@ -78,11 +51,7 @@ export default async function DashboardPage() {
     <DashboardView
       categories={categories}
       todayTransactions={todayTransactions}
-      monthlyStats={{
-        income: totalIncome,
-        expense: totalExpense,
-        net: totalIncome - totalExpense,
-      }}
+      monthlySummary={monthlySummary}
       gamification={gamification as GamificationProfile | null}
     />
   );

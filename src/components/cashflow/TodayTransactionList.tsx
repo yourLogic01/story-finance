@@ -2,36 +2,9 @@
 
 import { TransactionWithCategory } from "@/types";
 import { formatIDR } from "@/lib/utils/currency";
-import {
-  Coffee,
-  ShoppingCart,
-  Bus,
-  FileText,
-  Sparkles,
-  HeartPulse,
-  Tag,
-  Briefcase,
-  TrendingUp,
-  DollarSign,
-  PlusCircle,
-  LucideIcon,
-  ReceiptText,
-} from "lucide-react";
+import { ReceiptText } from "lucide-react";
+import { getCategoryIcon } from "@/lib/utils/icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const ICON_MAP: Record<string, LucideIcon> = {
-  coffee: Coffee,
-  "shopping-cart": ShoppingCart,
-  bus: Bus,
-  "file-text": FileText,
-  sparkles: Sparkles,
-  "heart-pulse": HeartPulse,
-  tag: Tag,
-  briefcase: Briefcase,
-  "trending-up": TrendingUp,
-  "dollar-sign": DollarSign,
-  "plus-circle": PlusCircle,
-};
 
 interface TodayTransactionListProps {
   transactions: TransactionWithCategory[];
@@ -65,7 +38,7 @@ export function TodayTransactionList({ transactions }: TodayTransactionListProps
           </div>
         ) : (
           transactions.map((tx) => {
-            const IconComp = ICON_MAP[tx.category?.icon] || Tag;
+            const IconComp = getCategoryIcon(tx.category?.icon);
             const isExpense = tx.type === "expense";
 
             return (
