@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Emerald Rounded Background -->
+  <rect width="512" height="512" rx="112" fill="#10B981"/>
+  
+  <!-- Wallet Body -->
+  <rect x="112" y="148" width="288" height="216" rx="36" fill="#FFFFFF"/>
+  
+  <!-- Wallet Flap -->
+  <path d="M 285 210 H 395 C 402 210 408 216 408 223 V 289 C 408 296 402 302 395 302 H 285 C 265 302 265 210 285 210 Z" fill="#10B981"/>
+  
+  <!-- Gold Clasp Coin -->
+  <circle cx="340" cy="256" r="20" fill="#F59E0B"/>
+  <circle cx="340" cy="256" r="14" fill="#FBBF24"/>
+</svg>

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
+import { ServiceWorkerRegister } from "@/components/layout/ServiceWorkerRegister";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -10,12 +11,22 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Story Finance | Catat Cashflow & Jajan Harian",
-  description: "Aplikasi pencatatan cashflow harian personal dengan budgeting dan gamifikasi yang menyenangkan.",
+  title: "Story Finance - Catatan Keuangan Harian",
+  description: "Catat pemasukan, pengeluaran harian, dan pantau batas anggaran.",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Story Finance",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+      { url: "/icons/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
   },
 };
 
@@ -35,6 +46,7 @@ export default function RootLayout({
   return (
     <html lang="id" className={poppins.variable}>
       <body className={`${poppins.className} font-sans min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-emerald-500 selection:text-white`}>
+        <ServiceWorkerRegister />
         <div className="mx-auto max-w-md min-h-screen flex flex-col bg-white shadow-xl relative pb-20">
           {children}
         </div>
