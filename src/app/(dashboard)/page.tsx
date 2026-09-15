@@ -3,6 +3,7 @@ import { DashboardView } from "@/components/cashflow/DashboardView";
 import { Category, TransactionWithCategory, GamificationProfile } from "@/types";
 import { getTodayDateString, getCurrentMonthYear } from "@/lib/utils/date";
 import { getMonthlySummary } from "@/app/actions/summary";
+import { getSelfRewardAllowance } from "@/app/actions/budgets";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
@@ -37,8 +38,11 @@ export default async function DashboardPage() {
 
   const todayTransactions = (rawTodayTx || []) as TransactionWithCategory[];
 
-  // 3. Fetch Monthly Summary
-  const monthlySummary = await getMonthlySummary(year, month);
+  // 3. Fetch Monthly Summary & Self-Reward Allowance
+  const [monthlySummary, selfRewardAllowance] = await Promise.all([
+    getMonthlySummary(year, month),
+    getSelfRewardAllowance(year, month),
+  ]);
 
   // 4. Fetch Gamification Profile
   const { data: gamification } = await supabase
@@ -52,6 +56,7 @@ export default async function DashboardPage() {
       categories={categories}
       todayTransactions={todayTransactions}
       monthlySummary={monthlySummary}
+      selfRewardAllowance={selfRewardAllowance}
       gamification={gamification as GamificationProfile | null}
     />
   );

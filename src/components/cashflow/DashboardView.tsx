@@ -8,11 +8,13 @@ import { QuickAddModal } from "@/components/cashflow/QuickAddModal";
 import { TodayTransactionList } from "@/components/cashflow/TodayTransactionList";
 import { MonthlySummaryCard } from "@/components/cashflow/MonthlySummaryCard";
 import { CategoryBreakdown } from "@/components/cashflow/CategoryBreakdown";
+import { SelfRewardMeter } from "@/components/budget/SelfRewardMeter";
 import {
   Category,
   TransactionWithCategory,
   GamificationProfile,
   MonthlySummary,
+  SelfRewardAllowance,
 } from "@/types";
 import { Plus } from "lucide-react";
 
@@ -20,6 +22,7 @@ interface DashboardViewProps {
   categories: Category[];
   todayTransactions: TransactionWithCategory[];
   monthlySummary: MonthlySummary;
+  selfRewardAllowance: SelfRewardAllowance;
   gamification: GamificationProfile | null;
 }
 
@@ -27,6 +30,7 @@ export function DashboardView({
   categories,
   todayTransactions,
   monthlySummary,
+  selfRewardAllowance,
   gamification,
 }: DashboardViewProps) {
   const router = useRouter();
@@ -47,6 +51,9 @@ export function DashboardView({
       <main className="flex-1 p-4 space-y-4 max-w-md mx-auto w-full">
         {/* Monthly Summary Card (T029) */}
         <MonthlySummaryCard summary={monthlySummary} />
+
+        {/* Guilt-Free Self-Reward Meter (T040) */}
+        <SelfRewardMeter allowance={selfRewardAllowance} />
 
         {/* Quick Add Action Trigger */}
         <button
