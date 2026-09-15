@@ -58,3 +58,12 @@ export function formatDisplayDate(dateStr: string): string {
 
   return `${day} ${getMonthName(month)} ${year}`;
 }
+
+export function getMonthDateRange(year: number, month: number): { startDate: string; endDate: string } {
+  const paddedMonth = String(month).padStart(2, "0");
+  const startDate = `${year}-${paddedMonth}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const endDate = `${year}-${paddedMonth}-${String(lastDay).padStart(2, "0")}`;
+  return { startDate, endDate };
+}
+

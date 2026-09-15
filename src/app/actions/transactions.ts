@@ -168,3 +168,86 @@ export async function createTransaction(formData: unknown) {
     },
   };
 }
+
+export async function updateTransaction(id: string, formData: unknown) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: "Tidak terautentikasi. Silakan masuk kembali." };
+  }
+
+  const parseResult = createTransactionSchema.safeParse(formData);
+  if (!parseResult.success) {
+    return {
+      success: false,
+      error: parseResult.error.errors[0]?.message || "Data transaksi tidak valid",
+    };
+  }
+
+  const { amount, type, categoryId, date, note } = parseResult.data;
+
+  const { data: updated, error } = await supabase
+    .from("transactions")
+    .update({
+      category_id: categoryId,
+      type,
+      amount,
+      date,
+      note: note || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .select("*, category:categories(*)")
+    .single();
+
+  if (error || !updated) {
+    return {
+      success: false,
+      error: error?.message || "Gagal memperbarui transaksi.",
+    };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/history");
+
+  return {
+    success: true,
+    data: updated,
+  };
+}
+
+export async function deleteTransaction(id: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: "Tidak terautentikasi. Silakan masuk kembali." };
+  }
+
+  const { error } = await supabase
+    .from("transactions")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return {
+      success: false,
+      error: error.message || "Gagal menghapus transaksi.",
+    };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/history");
+
+  return {
+    success: true,
+  };
+}
+
