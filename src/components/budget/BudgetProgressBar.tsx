@@ -3,13 +3,15 @@
 import { BudgetWithSpending } from "@/app/actions/budgets";
 import { formatIDR } from "@/lib/utils/currency";
 import { getCategoryIcon } from "@/lib/utils/icons";
-import { Tag } from "lucide-react";
+import { Tag, Pencil, Trash2 } from "lucide-react";
 
 interface BudgetProgressBarProps {
   budget: BudgetWithSpending;
+  onEdit?: (budget: BudgetWithSpending) => void;
+  onDelete?: (budget: BudgetWithSpending) => void;
 }
 
-export function BudgetProgressBar({ budget }: BudgetProgressBarProps) {
+export function BudgetProgressBar({ budget, onEdit, onDelete }: BudgetProgressBarProps) {
   const Icon = budget.category ? getCategoryIcon(budget.category.icon) : Tag;
   const color = budget.category?.color || "#10B981";
   const isOver = budget.spent > budget.effective_limit;
@@ -53,18 +55,42 @@ export function BudgetProgressBar({ budget }: BudgetProgressBarProps) {
           </div>
         </div>
 
-        {/* Percentage badge */}
-        <span
-          className={`text-[10px] font-pixel px-2 py-0.5 rounded border ${
-            isOver
-              ? "bg-rose-50 text-rose-700 border-rose-200"
-              : isNearLimit
-              ? "bg-amber-50 text-amber-700 border-amber-200"
-              : "bg-emerald-50 text-emerald-700 border-emerald-200"
-          }`}
-        >
-          {budget.percentage_used}%
-        </span>
+        {/* Action buttons & Percentage badge */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span
+            className={`text-[10px] font-pixel px-2 py-0.5 rounded border ${
+              isOver
+                ? "bg-rose-50 text-rose-700 border-rose-200"
+                : isNearLimit
+                ? "bg-amber-50 text-amber-700 border-amber-200"
+                : "bg-emerald-50 text-emerald-700 border-emerald-200"
+            }`}
+          >
+            {budget.percentage_used}%
+          </span>
+
+          {onEdit && (
+            <button
+              type="button"
+              onClick={() => onEdit(budget)}
+              aria-label="Ubah Anggaran"
+              className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(budget)}
+              aria-label="Hapus Anggaran"
+              className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Progress Bar */}

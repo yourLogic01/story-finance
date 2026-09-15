@@ -13,6 +13,8 @@ interface ConfigureBudgetModalProps {
   onClose: () => void;
   categories: Category[];
   initialCategory?: Category | null;
+  initialCalculationMode?: BudgetMode;
+  initialTargetValue?: number;
   year: number;
   month: number;
   onSuccess?: () => void;
@@ -23,6 +25,8 @@ export function ConfigureBudgetModal({
   onClose,
   categories,
   initialCategory,
+  initialCalculationMode,
+  initialTargetValue,
   year,
   month,
   onSuccess,
@@ -35,12 +39,37 @@ export function ConfigureBudgetModal({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     if (initialCategory) {
       setCategoryId(initialCategory.id);
-    } else if (categories.length > 0 && !categoryId) {
-      setCategoryId(categories[0].id);
+    } else {
+      const firstExpense = categories.find((c) => c.type === "expense");
+      if (firstExpense) {
+        setCategoryId(firstExpense.id);
+      } else if (categories.length > 0) {
+        setCategoryId(categories[0].id);
+      }
     }
-  }, [initialCategory, categories, categoryId]);
+
+    const mode = initialCalculationMode || "fixed";
+    setCalculationMode(mode);
+
+    if (initialTargetValue !== undefined && initialTargetValue !== null) {
+      if (mode === "percentage") {
+        setPercentageValue(String(initialTargetValue));
+        setRawTargetValue("");
+      } else {
+        setRawTargetValue(String(initialTargetValue));
+        setPercentageValue("10");
+      }
+    } else {
+      setRawTargetValue("");
+      setPercentageValue("10");
+    }
+
+    setErrorMsg(null);
+  }, [isOpen, initialCategory, initialCalculationMode, initialTargetValue, categories]);
 
   const expenseCategories = categories.filter((c) => c.type === "expense");
 
@@ -82,13 +111,15 @@ export function ConfigureBudgetModal({
     }
   };
 
+  const isEditing = initialTargetValue !== undefined && initialTargetValue !== null;
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="w-[calc(100%-2rem)] max-w-[400px] p-5 rounded-2xl">
         <DialogHeader className="pb-2 pr-8 text-left">
           <DialogTitle className="text-xs font-pixel tracking-wider text-slate-800 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>ATUR ANGGARAN</span>
+            <span>{isEditing ? "UBAH ANGGARAN" : "ATUR ANGGARAN"}</span>
           </DialogTitle>
         </DialogHeader>
 
@@ -205,7 +236,7 @@ export function ConfigureBudgetModal({
             disabled={loading}
             className="w-full h-11 text-xs font-bold rounded-xl mt-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
           >
-            {loading ? "Menyimpan..." : "Simpan Anggaran"}
+            {loading ? "Menyimpan..." : isEditing ? "Simpan Perubahan" : "Simpan Anggaran"}
           </Button>
         </form>
       </DialogContent>

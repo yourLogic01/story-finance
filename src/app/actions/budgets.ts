@@ -100,6 +100,32 @@ export async function upsertBudget(formData: unknown) {
   return { success: true, data: responseData };
 }
 
+export async function deleteBudget(id: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: "Tidak terautentikasi. Silakan masuk kembali." };
+  }
+
+  const { error } = await supabase
+    .from("budgets")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { success: false, error: error.message || "Gagal menghapus anggaran." };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/budgets");
+
+  return { success: true };
+}
+
 export async function getBudgets(
   year: number,
   month: number

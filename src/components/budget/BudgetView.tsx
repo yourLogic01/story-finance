@@ -12,8 +12,9 @@ import {
   Category,
   GamificationProfile,
   SelfRewardAllowance,
+  BudgetMode,
 } from "@/types";
-import { BudgetWithSpending } from "@/app/actions/budgets";
+import { BudgetWithSpending, deleteBudget } from "@/app/actions/budgets";
 import { deleteCategory } from "@/app/actions/categories";
 import { formatIDR } from "@/lib/utils/currency";
 import { getMonthName } from "@/lib/utils/date";
@@ -27,6 +28,7 @@ import {
   Wallet,
   Coins,
 } from "lucide-react";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface BudgetViewProps {
   budgets: BudgetWithSpending[];
@@ -56,8 +58,23 @@ export function BudgetView({
   // Modals state
   const [isConfigureOpen, setIsConfigureOpen] = useState(false);
   const [selectedBudgetCategory, setSelectedBudgetCategory] = useState<Category | null>(null);
+  const [selectedBudgetInitialMode, setSelectedBudgetInitialMode] = useState<BudgetMode | undefined>(undefined);
+  const [selectedBudgetTargetValue, setSelectedBudgetTargetValue] = useState<number | undefined>(undefined);
   const [isCreateCategoryOpen, setIsCreateCategoryOpen] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+
+  // Confirm delete dialog state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => Promise<void>;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    onConfirm: async () => {},
+  });
 
   // Navigation Month & Year
   const handlePrevMonth = () => {
@@ -84,13 +101,56 @@ export function BudgetView({
     router.push(`/budgets?year=${newYear}&month=${newMonth}`);
   };
 
-  const handleDeleteCategory = async (id: string, name: string) => {
-    if (!window.confirm(`Hapus kategori "${name}"?`)) {
-      return;
-    }
-    await deleteCategory(id);
-    startTransition(() => {
-      router.refresh();
+  const promptDeleteCategory = (id: string, name: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: `Hapus Kategori "${name}"?`,
+      description:
+        "Kategori kustom ini akan dihapus. Riwayat transaksi yang sudah menggunakan kategori ini tetap tersimpan.",
+      onConfirm: async () => {
+        await deleteCategory(id);
+        startTransition(() => {
+          router.refresh();
+        });
+      },
+    });
+  };
+
+  const handleOpenCreateBudget = () => {
+    setSelectedBudgetCategory(null);
+    setSelectedBudgetInitialMode("fixed");
+    setSelectedBudgetTargetValue(undefined);
+    setIsConfigureOpen(true);
+  };
+
+  const handleOpenSelfRewardBudget = () => {
+    setSelectedBudgetCategory(selfRewardCategory || null);
+    setSelectedBudgetInitialMode(selfRewardAllowance.configured ? selfRewardAllowance.mode : "fixed");
+    setSelectedBudgetTargetValue(selfRewardAllowance.configured ? selfRewardAllowance.targetValue : undefined);
+    setIsConfigureOpen(true);
+  };
+
+  const handleEditBudget = (budget: BudgetWithSpending) => {
+    setSelectedBudgetCategory(budget.category || null);
+    setSelectedBudgetInitialMode(budget.calculation_mode);
+    setSelectedBudgetTargetValue(budget.target_value);
+    setIsConfigureOpen(true);
+  };
+
+  const promptDeleteBudget = (budget: BudgetWithSpending) => {
+    const categoryName = budget.category?.name || "Global";
+    setConfirmDialog({
+      isOpen: true,
+      title: `Hapus Anggaran ${categoryName}?`,
+      description: `Batas pengeluaran untuk kategori ${categoryName} bulan ini akan dihapus. Riwayat pengeluaran yang sudah dicatat tidak akan terhapus.`,
+      onConfirm: async () => {
+        const res = await deleteBudget(budget.id);
+        if (res.success) {
+          startTransition(() => {
+            router.refresh();
+          });
+        }
+      },
     });
   };
 
@@ -154,10 +214,7 @@ export function BudgetView({
 
             <button
               type="button"
-              onClick={() => {
-                setSelectedBudgetCategory(selfRewardCategory || null);
-                setIsConfigureOpen(true);
-              }}
+              onClick={handleOpenSelfRewardBudget}
               className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200/60 transition-colors"
             >
               <Sliders className="w-3 h-3" />
@@ -220,10 +277,7 @@ export function BudgetView({
             </h3>
             <button
               type="button"
-              onClick={() => {
-                setSelectedBudgetCategory(null);
-                setIsConfigureOpen(true);
-              }}
+              onClick={handleOpenCreateBudget}
               className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -244,10 +298,7 @@ export function BudgetView({
               </p>
               <button
                 type="button"
-                onClick={() => {
-                  setSelectedBudgetCategory(null);
-                  setIsConfigureOpen(true);
-                }}
+                onClick={handleOpenCreateBudget}
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200/60 transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
@@ -255,7 +306,14 @@ export function BudgetView({
               </button>
             </div>
           ) : (
-            budgets.map((b) => <BudgetProgressBar key={b.id} budget={b} />)
+            budgets.map((b) => (
+              <BudgetProgressBar
+                key={b.id}
+                budget={b}
+                onEdit={handleEditBudget}
+                onDelete={promptDeleteBudget}
+              />
+            ))
           )}
         </div>
 
@@ -317,7 +375,7 @@ export function BudgetView({
 
                     <button
                       type="button"
-                      onClick={() => handleDeleteCategory(c.id, c.name)}
+                      onClick={() => promptDeleteCategory(c.id, c.name)}
                       aria-label="Hapus Kategori"
                       className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                     >
@@ -337,6 +395,8 @@ export function BudgetView({
         onClose={() => setIsConfigureOpen(false)}
         categories={categories}
         initialCategory={selectedBudgetCategory}
+        initialCalculationMode={selectedBudgetInitialMode}
+        initialTargetValue={selectedBudgetTargetValue}
         year={year}
         month={month}
         onSuccess={() => {
@@ -367,6 +427,18 @@ export function BudgetView({
             router.refresh();
           });
         }}
+      />
+
+      {/* Confirm Delete Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        confirmText="Hapus"
+        cancelText="Batal"
+        variant="danger"
       />
 
       {/* Bottom Navigation */}

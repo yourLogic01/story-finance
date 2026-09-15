@@ -25,6 +25,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface HistoryViewProps {
   categories: Category[];
@@ -83,14 +84,20 @@ export function HistoryView({
     router.push(`/history?year=${newYear}&month=${newMonth}`);
   };
 
+  // State for delete confirm dialog
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+
   // Handle Delete
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Apakah kamu yakin ingin menghapus transaksi ini?")) {
-      return;
-    }
-    setIsDeletingId(id);
-    await deleteTransaction(id);
+  const handleDelete = (id: string) => {
+    setDeleteTargetId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetId) return;
+    setIsDeletingId(deleteTargetId);
+    await deleteTransaction(deleteTargetId);
     setIsDeletingId(null);
+    setDeleteTargetId(null);
     startTransition(() => {
       router.refresh();
     });
@@ -347,6 +354,18 @@ export function HistoryView({
             router.refresh();
           });
         }}
+      />
+
+      {/* Confirm Delete Dialog */}
+      <ConfirmDialog
+        isOpen={!!deleteTargetId}
+        onClose={() => setDeleteTargetId(null)}
+        onConfirm={handleConfirmDelete}
+        title="Hapus Transaksi?"
+        description="Transaksi ini akan dihapus permanen dari riwayat pencatatan keuanganmu."
+        confirmText="Hapus"
+        cancelText="Batal"
+        variant="danger"
       />
 
       {/* Mobile Bottom Navigation */}
