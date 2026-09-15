@@ -62,7 +62,7 @@ export function DashboardView({
           className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>Catat Pengeluaran / Jajan Sekarang</span>
+          <span>Catat Pengeluaran / Pemasukan</span>
         </button>
 
         {/* Today's Transactions Feed */}
