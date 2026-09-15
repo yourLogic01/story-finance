@@ -9,7 +9,8 @@ import { Category } from "@/types";
 import { createTransaction } from "@/app/actions/transactions";
 import { getTodayDateString } from "@/lib/utils/date";
 import { formatIDR, parseIDRInput } from "@/lib/utils/currency";
-import { Flame, Sparkles, Check } from "lucide-react";
+import { enqueueOfflineTransaction } from "@/lib/offline/queue";
+import { Flame, Sparkles, Check, WifiOff } from "lucide-react";
 
 interface QuickAddModalProps {
   isOpen: boolean;
@@ -31,11 +32,12 @@ export function QuickAddModal({
   const [date, setDate] = useState<string>(getTodayDateString());
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [offlineSaved, setOfflineSaved] = useState<boolean>(false);
 
   // Gamification celebration popover state
   const [rewardCelebration, setRewardCelebration] = useState<{
     xp: number;
-    badge?: { id: string; title: string; icon: string } | null;
+    badge?: { title: string; icon: string } | null;
   } | null>(null);
 
   // Filter categories by active type (expense or income)
@@ -69,37 +71,86 @@ export function QuickAddModal({
     setLoading(true);
     setErrorMsg(null);
 
-    const result = await createTransaction({
-      amount: amountNum,
-      type,
-      categoryId,
-      date,
-      note: note.trim() || null,
-    });
+    // If device is currently offline, queue transaction to IndexedDB
+    if (typeof window !== "undefined" && !navigator.onLine) {
+      const cat = categories.find((c) => c.id === categoryId);
+      await enqueueOfflineTransaction({
+        amount: amountNum,
+        type,
+        categoryId,
+        categoryName: cat?.name,
+        date,
+        note: note.trim() || null,
+      });
 
-    setLoading(false);
+      window.dispatchEvent(new Event("story_finance_offline_queued"));
 
-    if (!result.success) {
-      setErrorMsg(result.error || "Gagal mencatat transaksi");
-    } else {
-      // Trigger celebration if XP or badge unlocked
-      if (result.gamification?.awardedXp || result.gamification?.unlockedBadge) {
-        setRewardCelebration({
-          xp: result.gamification.awardedXp,
-          badge: result.gamification.unlockedBadge,
-        });
-
-        setTimeout(() => {
-          setRewardCelebration(null);
-          resetForm();
-          onClose();
-          onSuccess?.();
-        }, 1800);
-      } else {
+      setLoading(false);
+      setOfflineSaved(true);
+      setTimeout(() => {
+        setOfflineSaved(false);
         resetForm();
         onClose();
         onSuccess?.();
+      }, 1600);
+      return;
+    }
+
+    try {
+      const result = await createTransaction({
+        amount: amountNum,
+        type,
+        categoryId,
+        date,
+        note: note.trim() || null,
+      });
+
+      setLoading(false);
+
+      if (!result.success) {
+        setErrorMsg(result.error || "Gagal mencatat transaksi");
+      } else {
+        // Trigger celebration if XP or badge unlocked
+        if (result.gamification?.awardedXp || result.gamification?.unlockedBadge) {
+          setRewardCelebration({
+            xp: result.gamification.awardedXp,
+            badge: result.gamification.unlockedBadge,
+          });
+
+          setTimeout(() => {
+            setRewardCelebration(null);
+            resetForm();
+            onClose();
+            onSuccess?.();
+          }, 1800);
+        } else {
+          resetForm();
+          onClose();
+          onSuccess?.();
+        }
       }
+    } catch {
+      // Network failed during request -> fallback to offline queue
+      const cat = categories.find((c) => c.id === categoryId);
+      await enqueueOfflineTransaction({
+        amount: amountNum,
+        type,
+        categoryId,
+        categoryName: cat?.name,
+        date,
+        note: note.trim() || null,
+      });
+
+      window.dispatchEvent(new Event("story_finance_offline_queued"));
+
+      setLoading(false);
+      setOfflineSaved(true);
+      setTimeout(() => {
+        setOfflineSaved(false);
+        resetForm();
+        onClose();
+        onSuccess?.();
+      }, 1600);
     }
   };
 
@@ -110,6 +161,7 @@ export function QuickAddModal({
     setDate(getTodayDateString());
     setErrorMsg(null);
     setRewardCelebration(null);
+    setOfflineSaved(false);
   };
 
   return (
@@ -122,7 +174,19 @@ export function QuickAddModal({
           </DialogTitle>
         </DialogHeader>
 
-        {rewardCelebration ? (
+        {offlineSaved ? (
+          <div className="py-8 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-200">
+            <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mb-3">
+              <WifiOff className="w-7 h-7" />
+            </div>
+            <h4 className="font-bold text-sm text-slate-900 mb-1">
+              Tersimpan di Perangkat!
+            </h4>
+            <p className="text-xs text-slate-500 max-w-[260px] mx-auto leading-relaxed">
+              Kamu sedang offline. Transaksi ini akan otomatis terkirim saat internetmu kembali menyala.
+            </p>
+          </div>
+        ) : rewardCelebration ? (
           <div className="py-8 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-200">
             <div className="w-16 h-16 rounded-2xl bg-amber-400 border-2 border-slate-900 shadow-retro flex items-center justify-center mb-3 animate-bounce">
               <Flame className="w-9 h-9 text-slate-950 fill-amber-300" />
