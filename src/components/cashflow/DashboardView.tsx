@@ -95,7 +95,7 @@ export function DashboardView({
         totalXp={gamification?.total_xp ?? 0}
       />
 
-      <main className="flex-1 p-4 space-y-4 max-w-md mx-auto w-full">
+      <main className="flex-1 p-4 space-y-4 max-w-md mx-auto w-full pb-24">
         {/* Monthly Summary Card (T029) */}
         <MonthlySummaryCard summary={monthlySummary} />
 

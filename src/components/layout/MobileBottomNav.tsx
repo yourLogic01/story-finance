@@ -11,6 +11,7 @@ interface MobileBottomNavProps {
 
 export function MobileBottomNav({ onQuickAddClick }: MobileBottomNavProps) {
   const pathname = usePathname();
+  const isDark = pathname.startsWith("/wishlist");
 
   // Do not display bottom nav on auth pages
   if (pathname.startsWith("/login") || pathname.startsWith("/register")) {
@@ -47,7 +48,12 @@ export function MobileBottomNav({ onQuickAddClick }: MobileBottomNavProps) {
   return (
     <nav
       aria-label="Bottom Navigation"
-      className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_24px_rgba(0,0,0,0.04)] px-3 py-1.5"
+      className={cn(
+        "fixed bottom-0 left-0 right-0 max-w-md mx-auto z-40 px-3 py-1.5 transition-colors duration-200",
+        isDark
+          ? "bg-slate-950 border-t border-slate-800 shadow-[0_-4px_24px_rgba(0,0,0,0.5)]"
+          : "bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_24px_rgba(0,0,0,0.04)]"
+      )}
     >
       <div className="flex items-center justify-between relative">
         {/* 1. Home */}
@@ -60,7 +66,11 @@ export function MobileBottomNav({ onQuickAddClick }: MobileBottomNavProps) {
             className={cn(
               "relative flex items-center justify-center p-1.5 rounded-xl transition-all duration-300 ease-out",
               navItems[0].isActive
-                ? "bg-emerald-50 text-emerald-600 scale-110 shadow-sm ring-1 ring-emerald-200/60"
+                ? isDark
+                  ? "bg-emerald-950 text-emerald-400 scale-110 shadow-sm ring-1 ring-emerald-800"
+                  : "bg-emerald-50 text-emerald-600 scale-110 shadow-sm ring-1 ring-emerald-200/60"
+                : isDark
+                ? "text-slate-400 group-hover:text-slate-200 group-hover:scale-105"
                 : "text-slate-400 group-hover:text-slate-600 group-hover:scale-105"
             )}
           >
@@ -70,7 +80,11 @@ export function MobileBottomNav({ onQuickAddClick }: MobileBottomNavProps) {
             className={cn(
               "text-[11px] mt-0.5 tracking-tight transition-all duration-200",
               navItems[0].isActive
-                ? "font-bold text-emerald-600"
+                ? isDark
+                  ? "font-bold text-emerald-400"
+                  : "font-bold text-emerald-600"
+                : isDark
+                ? "font-medium text-slate-400 group-hover:text-slate-200"
                 : "font-medium text-slate-400 group-hover:text-slate-600"
             )}
           >
@@ -97,7 +111,11 @@ export function MobileBottomNav({ onQuickAddClick }: MobileBottomNavProps) {
             className={cn(
               "relative flex items-center justify-center p-1.5 rounded-xl transition-all duration-300 ease-out",
               navItems[1].isActive
-                ? "bg-emerald-50 text-emerald-600 scale-110 shadow-sm ring-1 ring-emerald-200/60"
+                ? isDark
+                  ? "bg-emerald-950 text-emerald-400 scale-110 shadow-sm ring-1 ring-emerald-800"
+                  : "bg-emerald-50 text-emerald-600 scale-110 shadow-sm ring-1 ring-emerald-200/60"
+                : isDark
+                ? "text-slate-400 group-hover:text-slate-200 group-hover:scale-105"
                 : "text-slate-400 group-hover:text-slate-600 group-hover:scale-105"
             )}
           >
@@ -107,7 +125,11 @@ export function MobileBottomNav({ onQuickAddClick }: MobileBottomNavProps) {
             className={cn(
               "text-[11px] mt-0.5 tracking-tight transition-all duration-200",
               navItems[1].isActive
-                ? "font-bold text-emerald-600"
+                ? isDark
+                  ? "font-bold text-emerald-400"
+                  : "font-bold text-emerald-600"
+                : isDark
+                ? "font-medium text-slate-400 group-hover:text-slate-200"
                 : "font-medium text-slate-400 group-hover:text-slate-600"
             )}
           >
@@ -129,7 +151,12 @@ export function MobileBottomNav({ onQuickAddClick }: MobileBottomNavProps) {
             type="button"
             onClick={onQuickAddClick}
             aria-label="Catat Transaksi Cepat"
-            className="relative w-14 h-14 rounded-full bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 active:scale-95 transition-transform duration-150 flex items-center justify-center shadow-[0_6px_16px_rgba(16,185,129,0.4)] ring-4 ring-white focus:outline-none"
+            className={cn(
+              "relative w-14 h-14 rounded-full bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 active:scale-95 transition-transform duration-150 flex items-center justify-center focus:outline-none",
+              isDark
+                ? "ring-4 ring-slate-950 shadow-[0_6px_16px_rgba(16,185,129,0.3)]"
+                : "ring-4 ring-white shadow-[0_6px_16px_rgba(16,185,129,0.4)]"
+            )}
           >
             {/* Subtle inner tactile ring */}
             <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
@@ -160,7 +187,11 @@ export function MobileBottomNav({ onQuickAddClick }: MobileBottomNavProps) {
             className={cn(
               "relative flex items-center justify-center p-1.5 rounded-xl transition-all duration-300 ease-out",
               navItems[2].isActive
-                ? "bg-emerald-50 text-emerald-600 scale-110 shadow-sm ring-1 ring-emerald-200/60"
+                ? isDark
+                  ? "bg-emerald-950 text-emerald-400 scale-110 shadow-sm ring-1 ring-emerald-800"
+                  : "bg-emerald-50 text-emerald-600 scale-110 shadow-sm ring-1 ring-emerald-200/60"
+                : isDark
+                ? "text-slate-400 group-hover:text-slate-200 group-hover:scale-105"
                 : "text-slate-400 group-hover:text-slate-600 group-hover:scale-105"
             )}
           >
@@ -170,7 +201,11 @@ export function MobileBottomNav({ onQuickAddClick }: MobileBottomNavProps) {
             className={cn(
               "text-[11px] mt-0.5 tracking-tight transition-all duration-200",
               navItems[2].isActive
-                ? "font-bold text-emerald-600"
+                ? isDark
+                  ? "font-bold text-emerald-400"
+                  : "font-bold text-emerald-600"
+                : isDark
+                ? "font-medium text-slate-400 group-hover:text-slate-200"
                 : "font-medium text-slate-400 group-hover:text-slate-600"
             )}
           >
@@ -196,7 +231,11 @@ export function MobileBottomNav({ onQuickAddClick }: MobileBottomNavProps) {
             className={cn(
               "relative flex items-center justify-center p-1.5 rounded-xl transition-all duration-300 ease-out",
               navItems[3].isActive
-                ? "bg-emerald-50 text-emerald-600 scale-110 shadow-sm ring-1 ring-emerald-200/60"
+                ? isDark
+                  ? "bg-emerald-950 text-emerald-400 scale-110 shadow-sm ring-1 ring-emerald-800"
+                  : "bg-emerald-50 text-emerald-600 scale-110 shadow-sm ring-1 ring-emerald-200/60"
+                : isDark
+                ? "text-slate-400 group-hover:text-slate-200 group-hover:scale-105"
                 : "text-slate-400 group-hover:text-slate-600 group-hover:scale-105"
             )}
           >
@@ -206,7 +245,11 @@ export function MobileBottomNav({ onQuickAddClick }: MobileBottomNavProps) {
             className={cn(
               "text-[11px] mt-0.5 tracking-tight transition-all duration-200",
               navItems[3].isActive
-                ? "font-bold text-emerald-600"
+                ? isDark
+                  ? "font-bold text-emerald-400"
+                  : "font-bold text-emerald-600"
+                : isDark
+                ? "font-medium text-slate-400 group-hover:text-slate-200"
                 : "font-medium text-slate-400 group-hover:text-slate-600"
             )}
           >
