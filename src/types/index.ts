@@ -128,3 +128,20 @@ export interface GamificationState {
   progressPercent: number;
   badges: (Badge & { unlocked: boolean; unlockedAt: string | null })[];
 }
+
+export type WishlistStatus = "saving" | "ready" | "purchased";
+
+export interface WishlistItem {
+  id: string;
+  user_id: string;
+  name: string;
+  target_amount: number;
+  saved_amount: number;
+  icon: string;
+  category_id: string | null;
+  category?: Category | null;
+  status: WishlistStatus;
+  created_at: string;
+  purchased_at: string | null;
+}
+

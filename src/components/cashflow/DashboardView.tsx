@@ -19,7 +19,9 @@ import {
 import { Plus } from "lucide-react";
 import { logNoSpendDay, cancelNoSpendDay } from "@/app/actions/no-spend";
 import { getMonthlyRecapData, MonthlyRecapData } from "@/app/actions/recap";
+import { WishlistSummaryData } from "@/app/actions/wishlist";
 import { RetroMonthlyRecapModal } from "@/components/retro/RetroMonthlyRecapModal";
+import { DashboardWishlistCard } from "@/components/wishlist/DashboardWishlistCard";
 import { getTodayDateString } from "@/lib/utils/date";
 
 interface DashboardViewProps {
@@ -29,6 +31,7 @@ interface DashboardViewProps {
   selfRewardAllowance: SelfRewardAllowance;
   gamification: GamificationProfile | null;
   isNoSpendToday?: boolean;
+  wishlistSummary?: WishlistSummaryData | null;
 }
 
 export function DashboardView({
@@ -38,6 +41,7 @@ export function DashboardView({
   selfRewardAllowance,
   gamification,
   isNoSpendToday = false,
+  wishlistSummary,
 }: DashboardViewProps) {
   const router = useRouter();
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
@@ -113,6 +117,15 @@ export function DashboardView({
 
         {/* Guilt-Free Self-Reward Meter (T040) */}
         <SelfRewardMeter allowance={selfRewardAllowance} />
+
+        {/* Wishlist Bag RPG Card */}
+        {wishlistSummary && (
+          <DashboardWishlistCard
+            items={wishlistSummary.items}
+            totalSaved={wishlistSummary.totalSaved}
+            activeCount={wishlistSummary.activeCount}
+          />
+        )}
 
         {/* Quick Add Action Trigger */}
         <button

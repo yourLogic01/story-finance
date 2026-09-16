@@ -5,6 +5,7 @@ import { getTodayDateString, getCurrentMonthYear } from "@/lib/utils/date";
 import { getMonthlySummary } from "@/app/actions/summary";
 import { getSelfRewardAllowance } from "@/app/actions/budgets";
 import { isTodayNoSpend } from "@/app/actions/no-spend";
+import { getWishlistData } from "@/app/actions/wishlist";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
@@ -29,6 +30,7 @@ export default async function DashboardPage() {
     selfRewardAllowance,
     { data: gamification },
     isNoSpendToday,
+    wishlistSummary,
   ] = await Promise.all([
     supabase
       .from("categories")
@@ -48,6 +50,7 @@ export default async function DashboardPage() {
       .eq("user_id", user.id)
       .maybeSingle(),
     isTodayNoSpend(),
+    getWishlistData(),
   ]);
 
   const categories = (rawCategories || []) as Category[];
@@ -61,6 +64,8 @@ export default async function DashboardPage() {
       selfRewardAllowance={selfRewardAllowance}
       gamification={gamification as GamificationProfile | null}
       isNoSpendToday={isNoSpendToday}
+      wishlistSummary={wishlistSummary}
     />
   );
 }
+

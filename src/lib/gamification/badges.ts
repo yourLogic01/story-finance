@@ -109,6 +109,20 @@ export const KNOWN_BADGES: BadgeDefinition[] = [
     icon: "shield-check",
     xp_reward: 150,
   },
+  {
+    id: "wishlist_first",
+    title: "Penebus Impian",
+    description: "Berhasil menabung dan menebus 1 barang impian di Wishlist Bag",
+    icon: "gift",
+    xp_reward: 100,
+  },
+  {
+    id: "wishlist_collector",
+    title: "Kolektor Impian",
+    description: "Berhasil menebus 3 barang impian dari Wishlist Bag",
+    icon: "trophy",
+    xp_reward: 250,
+  },
 ];
 
 export interface BadgeEvaluationContext {
@@ -119,6 +133,7 @@ export interface BadgeEvaluationContext {
   isSelfRewardSafe?: boolean;
   isBudgetHero?: boolean;
   noSpendDaysCount?: number;
+  purchasedWishlistCount?: number;
 }
 
 /**
@@ -149,5 +164,10 @@ export function evaluateEligibleBadges(context: BadgeEvaluationContext): string[
   if ((context.noSpendDaysCount || 0) >= 1) eligibleIds.push("no_spend_first");
   if ((context.noSpendDaysCount || 0) >= 7) eligibleIds.push("no_spend_7");
 
+  // 5. Wishlist milestones
+  if ((context.purchasedWishlistCount || 0) >= 1) eligibleIds.push("wishlist_first");
+  if ((context.purchasedWishlistCount || 0) >= 3) eligibleIds.push("wishlist_collector");
+
   return eligibleIds;
 }
+
