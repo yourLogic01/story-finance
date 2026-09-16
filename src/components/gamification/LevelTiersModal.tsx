@@ -14,7 +14,8 @@ import {
   getLevelInfo,
 } from "@/lib/gamification/xp";
 import { cn } from "@/lib/utils";
-import { Lock, Check, Sparkles } from "lucide-react";
+import { Lock, Check } from "lucide-react";
+import { RetroTierIcon } from "@/components/retro/RetroTierIcon";
 
 interface LevelTiersModalProps {
   isOpen: boolean;
@@ -36,116 +37,95 @@ export function LevelTiersModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md w-[calc(100%-2rem)] p-0 overflow-hidden border-slate-200/90 shadow-2xl rounded-3xl max-h-[85vh] flex flex-col bg-slate-50">
-        {/* Header Section with Retro Gradient & Pixel Accent */}
-        <div className="p-5 bg-white border-b border-slate-200/80 shrink-0 space-y-3">
-          <DialogHeader className="text-left space-y-1">
+      <DialogContent className="max-w-sm w-[calc(100%-2rem)] p-0 overflow-hidden border-slate-200/90 shadow-2xl rounded-2xl max-h-[88vh] flex flex-col bg-slate-50">
+        {/* Compact Header */}
+        <div className="px-4 py-3 bg-white border-b border-slate-200/80 shrink-0 space-y-2.5">
+          <DialogHeader className="text-left space-y-0.5">
             <div className="flex items-center justify-between pr-6">
-              <span className="text-[10px] font-pixel font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
-                Tingkatan Akun
-              </span>
-              <span className="text-xs text-slate-400 font-pixel">
+              <DialogTitle className="text-sm font-bold text-slate-900">
+                Daftar Level & Title
+              </DialogTitle>
+              <span className="text-[11px] font-pixel text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                 {totalXp} XP
               </span>
             </div>
-            <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-1.5">
-              <span>Daftar Level & Title</span>
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
-              Kumpulkan XP dari catatan harian untuk membuka level dan title baru.
+            <DialogDescription className="text-[11px] text-slate-500">
+              Kumpulkan XP dari catatan harian untuk naik level.
             </DialogDescription>
           </DialogHeader>
 
-          {/* Current Rank Showcase Card */}
-          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-md flex items-center justify-between relative overflow-hidden">
-            <div className="flex items-center gap-3 relative z-10">
-              {/* Avatar with Current Tier Ring */}
-              <div className="relative">
+          {/* Compact Current Rank Banner */}
+          <div className="p-2.5 rounded-xl bg-slate-900 text-white flex items-center justify-between shadow-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              {/* Avatar with Tier Ring */}
+              <div className="relative shrink-0">
                 <div
                   className={cn(
-                    "w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 text-white flex items-center justify-center font-bold text-base shadow-sm transition-all",
+                    "w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 text-white flex items-center justify-center font-bold text-xs shadow-xs",
                     currentTier.ringClass
                   )}
                 >
                   {displayName.charAt(0).toUpperCase()}
                 </div>
-                {/* Tier Border Symbol */}
-                <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white text-slate-900 shadow-xs flex items-center justify-center text-[10px] font-bold border border-slate-200">
-                  {currentTier.borderSymbol}
+                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+                  <RetroTierIcon tierId={currentTier.id} size={10} />
                 </div>
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px] font-pixel text-emerald-400">
                     Lv.{currentLevel}
                   </span>
-                  <span className="text-[10px] text-slate-400">•</span>
-                  <span className="text-xs font-bold text-white tracking-tight">
+                  <span className="text-xs font-bold text-white truncate">
                     {levelInfo.title}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[10px] text-slate-300 font-medium">
-                    {currentTier.name}
-                  </span>
-                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-white/15 text-slate-200 font-pixel">
-                    {currentTier.titleRange}
-                  </span>
-                </div>
+                <span className="text-[10px] text-slate-400 block leading-tight">
+                  {currentTier.name} ({currentTier.titleRange})
+                </span>
               </div>
             </div>
 
-            {/* Next Tier Status */}
-            <div className="text-right relative z-10">
-              <span className="text-[10px] text-slate-400 block font-medium">
-                {levelInfo.isMaxLevel ? "Level Maksimal" : "Target Berikutnya"}
+            {/* Target next level */}
+            <div className="text-right shrink-0 pl-2">
+              <span className="text-[9px] text-slate-400 block">
+                {levelInfo.isMaxLevel ? "Level Maksimal" : "Target"}
               </span>
-              <span className="text-xs font-bold text-emerald-400 font-pixel block">
+              <span className="text-[10px] font-bold text-emerald-400 font-pixel block leading-tight">
                 {levelInfo.isMaxLevel
-                  ? "Maksimal"
+                  ? "MAX"
                   : `Lv.${currentLevel + 1} (${levelInfo.xpNeededForNextTier - levelInfo.xpInCurrentTier} XP)`}
               </span>
             </div>
-
-            {/* Decorative background glow */}
-            <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/20 rounded-full blur-xl pointer-events-none" />
           </div>
         </div>
 
-        {/* Scrollable Tier List Grouped by Rank */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-5">
+        {/* Scrollable Level List */}
+        <div className="flex-1 overflow-y-auto px-3.5 py-3 space-y-4">
           {TIER_GROUPS.map((group) => {
             const tiersInGroup = LEVEL_TIERS.filter(
               (t) => t.level >= group.minLevel && t.level <= group.maxLevel
             );
-
             const isGroupUnlocked = currentLevel >= group.minLevel;
 
             return (
-              <div key={group.id} className="space-y-2">
-                {/* Tier Group Header */}
+              <div key={group.id} className="space-y-1.5">
+                {/* Compact Tier Header */}
                 <div className="flex items-center justify-between px-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">{group.borderSymbol}</span>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="text-xs font-bold text-slate-900 tracking-tight font-pixel">
-                          {group.name}
-                        </h4>
-                        <span className="text-[10px] text-slate-400 font-medium">
-                          ({group.titleRange})
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-slate-500 leading-tight">
-                        {group.description}
-                      </p>
-                    </div>
+                  <div className="flex items-center gap-1.5">
+                    <RetroTierIcon tierId={group.id} size={14} />
+                    <h4 className="text-[11px] font-bold text-slate-800 tracking-tight font-pixel uppercase">
+                      {group.name}
+                    </h4>
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      ({group.titleRange})
+                    </span>
                   </div>
 
                   <span
                     className={cn(
-                      "text-[9px] font-bold px-2 py-0.5 rounded-full border shrink-0",
+                      "text-[9px] font-semibold px-1.5 py-0.2 rounded border",
                       isGroupUnlocked
                         ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                         : "bg-slate-100 text-slate-400 border-slate-200"
@@ -155,8 +135,8 @@ export function LevelTiersModal({
                   </span>
                 </div>
 
-                {/* Levels inside this Tier */}
-                <div className="space-y-1.5">
+                {/* Level Rows */}
+                <div className="space-y-1">
                   {tiersInGroup.map((tier) => {
                     const isCurrent = tier.level === currentLevel;
                     const isUnlocked = tier.level <= currentLevel;
@@ -166,50 +146,52 @@ export function LevelTiersModal({
                       <div
                         key={tier.level}
                         className={cn(
-                          "p-2.5 rounded-xl border transition-all flex items-center justify-between",
+                          "px-2.5 py-2 rounded-xl border transition-all flex items-center justify-between gap-2",
                           isCurrent
-                            ? "bg-emerald-50/80 border-emerald-300 shadow-xs ring-1 ring-emerald-200"
+                            ? "bg-emerald-50/90 border-emerald-300 ring-1 ring-emerald-200 shadow-xs"
                             : isUnlocked
-                            ? "bg-white border-slate-200/80"
-                            : "bg-slate-100/60 border-slate-200/60 opacity-75"
+                            ? "bg-white border-slate-200/80 shadow-2xs"
+                            : "bg-slate-100/50 border-slate-200/60 opacity-70"
                         )}
                       >
-                        {/* Level Icon & Info */}
+                        {/* Left: Pixel Icon & Details */}
                         <div className="flex items-center gap-2.5 min-w-0">
-                          {/* Level Icon Badge */}
                           <div
                             className={cn(
-                              "w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 border",
+                              "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border",
                               isCurrent
-                                ? "bg-emerald-100 border-emerald-300 shadow-xs"
+                                ? "bg-emerald-100 border-emerald-300"
                                 : isUnlocked
                                 ? "bg-slate-50 border-slate-200"
-                                : "bg-slate-200/60 border-slate-300 text-slate-400"
+                                : "bg-slate-200/60 border-slate-300"
                             )}
                           >
-                            {tier.icon}
+                            <RetroTierIcon
+                              tierId={tier.tierId}
+                              size={14}
+                              className={isUnlocked ? "" : "grayscale opacity-60"}
+                            />
                           </div>
 
                           <div className="min-w-0">
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-baseline gap-1.5">
                               <span
                                 className={cn(
-                                  "text-[10px] font-pixel",
+                                  "text-[10px] font-pixel shrink-0",
                                   isCurrent
                                     ? "text-emerald-700 font-bold"
                                     : isUnlocked
-                                    ? "text-slate-700"
+                                    ? "text-slate-600"
                                     : "text-slate-400"
                                 )}
                               >
                                 Lv.{tier.level}
                               </span>
-                              <span className="text-[10px] text-slate-300">•</span>
                               <h5
                                 className={cn(
-                                  "text-xs font-bold truncate",
+                                  "text-xs font-bold leading-tight",
                                   isCurrent
-                                    ? "text-emerald-900"
+                                    ? "text-emerald-950"
                                     : isUnlocked
                                     ? "text-slate-800"
                                     : "text-slate-500"
@@ -218,7 +200,7 @@ export function LevelTiersModal({
                                 {tier.title}
                               </h5>
                             </div>
-                            <span className="text-[10px] text-slate-400 font-medium block">
+                            <span className="text-[10px] text-slate-400 font-medium block leading-tight mt-0.5">
                               {tier.maxXp === null
                                 ? `Min. ${tier.minXp} XP`
                                 : `${tier.minXp} - ${tier.maxXp} XP`}
@@ -226,24 +208,22 @@ export function LevelTiersModal({
                           </div>
                         </div>
 
-                        {/* Status Tag */}
-                        <div className="shrink-0 pl-2">
+                        {/* Right: Compact Status Badge */}
+                        <div className="shrink-0">
                           {isCurrent ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-pixel font-bold shadow-xs">
-                              <Sparkles className="w-2.5 h-2.5" />
-                              <span>LEVEL AKTIF</span>
+                            <span className="px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[9px] font-pixel font-bold shadow-xs flex items-center gap-0.5">
+                              <span className="w-1 h-1 rounded-full bg-emerald-200 animate-pulse" />
+                              <span>AKTIF</span>
                             </span>
                           ) : isUnlocked ? (
-                            <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
-                              <Check className="w-3 h-3 stroke-[3]" />
+                            <div className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                              <Check className="w-2.5 h-2.5 stroke-[3]" />
                             </div>
                           ) : (
-                            <div className="flex items-center gap-1 text-[10px] font-medium text-slate-400">
-                              <Lock className="w-3 h-3 text-slate-400" />
-                              <span className="font-pixel text-[9px]">
-                                Kurang {xpNeeded} XP
-                              </span>
-                            </div>
+                            <span className="text-[9px] font-pixel text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded flex items-center gap-1 border border-slate-200/60">
+                              <Lock className="w-2.5 h-2.5" />
+                              <span>-{xpNeeded} XP</span>
+                            </span>
                           )}
                         </div>
                       </div>
@@ -255,12 +235,12 @@ export function LevelTiersModal({
           })}
         </div>
 
-        {/* Footer Close Button */}
-        <div className="p-3 bg-white border-t border-slate-200/80 text-center shrink-0">
+        {/* Compact Footer */}
+        <div className="p-2.5 bg-white border-t border-slate-200/80 text-center shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors shadow-xs"
+            className="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors shadow-xs"
           >
             Tutup
           </button>
