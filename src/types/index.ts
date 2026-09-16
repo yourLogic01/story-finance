@@ -3,8 +3,19 @@ export interface Profile {
   email: string;
   display_name: string | null;
   currency: string;
+  reminder_enabled?: boolean;
+  reminder_time?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface PushSubscriptionRecord {
+  id: string;
+  user_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  created_at: string;
 }
 
 export interface Category {

@@ -104,3 +104,59 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 });
+
+// 4. Web Push Notification: Receive and display notification in status bar
+self.addEventListener("push", (event) => {
+  let payload = {
+    title: "Story Finance",
+    body: "Jangan lupa mencatat pengeluaranmu hari ini!",
+    url: "/",
+  };
+
+  if (event.data) {
+    try {
+      payload = event.data.json();
+    } catch {
+      payload.body = event.data.text();
+    }
+  }
+
+  const title = payload.title || "Story Finance";
+  const options = {
+    body: payload.body || "Jangan lupa mencatat pengeluaranmu hari ini!",
+    icon: "/icons/icon-192x192.png",
+    badge: "/icons/icon-192x192.png",
+    vibrate: [100, 50, 100],
+    tag: "daily-reminder",
+    renotify: true,
+    data: {
+      url: payload.url || "/",
+      dateOfArrival: Date.now(),
+    },
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// 5. Notification Click: Open or focus app window
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const urlToOpen = event.notification.data?.url || "/";
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((windowClients) => {
+        // Focus existing app window if already open
+        for (const client of windowClients) {
+          if (client.url.startsWith(self.location.origin) && "focus" in client) {
+            return client.focus();
+          }
+        }
+        // Otherwise open a new window
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(urlToOpen);
+        }
+      })
+  );
+});

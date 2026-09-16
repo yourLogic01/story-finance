@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
@@ -17,8 +17,23 @@ import {
   Zap,
   Receipt,
   LogOut,
+  Bell,
+  Clock,
+  Send,
 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { cn } from "@/lib/utils";
+import {
+  isPushNotificationSupported,
+  subscribeToWebPush,
+  unsubscribeFromWebPush,
+  getExistingPushSubscription,
+} from "@/lib/push/client";
+import {
+  savePushSubscription,
+  removePushSubscription,
+  sendTestPushNotification,
+} from "@/app/actions/notifications";
 
 interface ProfileViewProps {
   userProfile: Profile | null;
@@ -39,6 +54,90 @@ export function ProfileView({
   const [, startTransition] = useTransition();
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+
+  // Daily Reminder States
+  const [isReminderEnabled, setIsReminderEnabled] = useState(
+    userProfile?.reminder_enabled ?? false
+  );
+  const [isLoadingReminder, setIsLoadingReminder] = useState(false);
+  const [isTestingReminder, setIsTestingReminder] = useState(false);
+  const [reminderFeedback, setReminderFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (isPushNotificationSupported()) {
+      getExistingPushSubscription().then((sub) => {
+        if (sub && userProfile?.reminder_enabled) {
+          setIsReminderEnabled(true);
+        }
+      });
+    }
+  }, [userProfile?.reminder_enabled]);
+
+  const handleToggleReminder = async () => {
+    setReminderFeedback(null);
+    setIsLoadingReminder(true);
+
+    if (!isReminderEnabled) {
+      const result = await subscribeToWebPush();
+      if (!result.success) {
+        setReminderFeedback({ type: "error", message: result.error });
+        setIsLoadingReminder(false);
+        return;
+      }
+
+      const saveRes = await savePushSubscription(result.data);
+      if (!saveRes.success) {
+        setReminderFeedback({
+          type: "error",
+          message: saveRes.error || "Gagal menyimpan langganan notifikasi.",
+        });
+        setIsLoadingReminder(false);
+        return;
+      }
+
+      setIsReminderEnabled(true);
+      setReminderFeedback({
+        type: "success",
+        message: "Pengingat jam 20:00 WIB berhasil aktif di perangkat ini!",
+      });
+    } else {
+      const unsubs = await unsubscribeFromWebPush();
+      if (unsubs.success) {
+        await removePushSubscription(unsubs.endpoint);
+        setIsReminderEnabled(false);
+        setReminderFeedback({
+          type: "success",
+          message: "Pengingat harian berhasil dinonaktifkan.",
+        });
+      } else {
+        setReminderFeedback({ type: "error", message: unsubs.error });
+      }
+    }
+
+    setIsLoadingReminder(false);
+  };
+
+  const handleSendTest = async () => {
+    setReminderFeedback(null);
+    setIsTestingReminder(true);
+    const result = await sendTestPushNotification();
+    setIsTestingReminder(false);
+
+    if (result.success) {
+      setReminderFeedback({
+        type: "success",
+        message: "Notifikasi percobaan berhasil dikirim! Periksa bar notifikasi perangkat Anda.",
+      });
+    } else {
+      setReminderFeedback({
+        type: "error",
+        message: result.error || "Gagal mengirim notifikasi percobaan.",
+      });
+    }
+  };
 
   const displayName =
     userProfile?.display_name || userEmail.split("@")[0] || "Pencatat Bijak";
@@ -153,6 +252,81 @@ export function ProfileView({
         {/* Badges Grid Section */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
           <BadgeGrid badges={gamification?.badges || []} />
+        </div>
+
+        {/* Daily Reminder (Push Notification) Card */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 shadow-xs">
+                <Bell className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  <span>Pengingat Harian</span>
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100/80 text-amber-800">
+                    20:00 WIB
+                  </span>
+                </h3>
+                <p className="text-[11px] text-slate-500">
+                  Notifikasi HP jika belum mencatat pengeluaran
+                </p>
+              </div>
+            </div>
+
+            {/* Retro / Clean Switch Toggle */}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isReminderEnabled}
+              onClick={handleToggleReminder}
+              disabled={isLoadingReminder}
+              className={cn(
+                "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                isReminderEnabled ? "bg-emerald-500" : "bg-slate-200",
+                isLoadingReminder && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              <span
+                className={cn(
+                  "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
+                  isReminderEnabled ? "translate-x-5" : "translate-x-0"
+                )}
+              />
+            </button>
+          </div>
+
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-[11px] flex items-center gap-1.5 text-slate-400">
+              <Clock className="w-3.5 h-3.5" />
+              <span>Otomatis lewati jika sudah catat hari ini</span>
+            </span>
+
+            {isReminderEnabled && (
+              <button
+                type="button"
+                onClick={handleSendTest}
+                disabled={isTestingReminder}
+                className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 active:scale-95 transition-all flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded-lg"
+              >
+                <Send className="w-3 h-3" />
+                <span>{isTestingReminder ? "Mengirim..." : "Tes Notif"}</span>
+              </button>
+            )}
+          </div>
+
+          {reminderFeedback && (
+            <div
+              className={cn(
+                "p-2.5 text-xs rounded-xl border flex items-start gap-2 animate-in fade-in duration-200",
+                reminderFeedback.type === "success"
+                  ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                  : "bg-rose-50 border-rose-200 text-rose-800"
+              )}
+            >
+              <span className="text-xs leading-relaxed">{reminderFeedback.message}</span>
+            </div>
+          )}
         </div>
 
         {/* Logout Section */}
