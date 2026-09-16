@@ -2,12 +2,15 @@
 
 import { getLevelInfo } from "@/lib/gamification/xp";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface RetroXpBarProps {
   totalXp: number;
   level?: number;
   variant?: "header" | "card";
   href?: string;
+  onViewTiersClick?: () => void;
+  onClick?: () => void;
 }
 
 export function RetroXpBar({
@@ -15,13 +18,15 @@ export function RetroXpBar({
   level: propLevel,
   variant = "header",
   href,
+  onViewTiersClick,
+  onClick,
 }: RetroXpBarProps) {
   const levelInfo = getLevelInfo(totalXp);
   const displayLevel = propLevel || levelInfo.level;
 
   if (variant === "header") {
-    const headerPill = (
-      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 shadow-xs hover:border-emerald-300 transition-all select-none">
+    const pillContent = (
+      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 shadow-xs hover:border-emerald-300 active:scale-95 transition-all select-none">
         <span className="text-[10px] font-pixel text-emerald-600 bg-emerald-100/80 px-1.5 py-0.5 rounded">
           Lv.{displayLevel}
         </span>
@@ -34,18 +39,30 @@ export function RetroXpBar({
       </div>
     );
 
+    if (onClick) {
+      return (
+        <button
+          type="button"
+          onClick={onClick}
+          className="focus:outline-none rounded-full"
+        >
+          {pillContent}
+        </button>
+      );
+    }
+
     if (href) {
       return (
         <Link
           href={href}
           className="inline-block focus:outline-none focus:ring-1 focus:ring-emerald-400 rounded-full"
         >
-          {headerPill}
+          {pillContent}
         </Link>
       );
     }
 
-    return headerPill;
+    return pillContent;
   }
 
   // Segmented 8-bit block bar (10 segments)
@@ -56,15 +73,27 @@ export function RetroXpBar({
     <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-3">
       {/* Level Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-pixel text-xs shadow-xs">
+        <div
+          onClick={onViewTiersClick}
+          className={cn(
+            "flex items-center gap-2",
+            onViewTiersClick &&
+              "cursor-pointer group select-none active:scale-95 transition-all"
+          )}
+        >
+          <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-pixel text-xs shadow-xs group-hover:bg-emerald-600 transition-colors">
             {displayLevel}
           </div>
           <div>
-            <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
-              Level {displayLevel}
+            <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider flex items-center gap-1">
+              <span>Level {displayLevel}</span>
+              {onViewTiersClick && (
+                <span className="text-[9px] font-pixel text-emerald-600 bg-emerald-50 px-1 rounded border border-emerald-200/60 group-hover:bg-emerald-100">
+                  Lihat Gelar ➔
+                </span>
+              )}
             </span>
-            <h4 className="text-xs font-bold text-slate-800">
+            <h4 className="text-xs font-bold text-slate-800 group-hover:text-emerald-700 transition-colors">
               {levelInfo.title}
             </h4>
           </div>

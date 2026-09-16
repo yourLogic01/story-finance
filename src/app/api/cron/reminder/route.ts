@@ -107,13 +107,13 @@ export async function GET(request: Request) {
 
     const streak = gamification?.current_streak || 0;
 
-    // Copywriting santai & memotivasi (bebas gaya robotik / AI generated)
-    let title = "Sudah jajan apa aja hari ini? ☕";
-    let body = "Catat pengeluaranmu sekarang biar dompet tetap terkontrol dan dapat bonus XP!";
+    // Copywriting santai & natural
+    let title = "Belum catat pengeluaran hari ini?";
+    let body = "Yuk sempetin catat jajan atau belanja kamu hari ini.";
 
     if (streak > 0) {
-      title = `🔥 Streak ${streak} hari kamu sayang kalau putus!`;
-      body = "Yuk sempetin 10 detik buat catat pengeluaran hari ini sebelum jam 12 malam.";
+      title = `🔥 Streak ${streak} hari kamu jalan terus!`;
+      body = "Jangan lupa catat pengeluaran hari ini biar streak tetap lanjut.";
     }
 
     const payload = JSON.stringify({

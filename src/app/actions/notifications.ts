@@ -164,11 +164,11 @@ export async function sendTestPushNotification() {
   const streak = gamification?.current_streak || 0;
   const bodyMessage =
     streak > 0
-      ? `Mantap! Pengingat jam 20:00 WIB sudah siap menjaga streak ${streak} harimu 🔥`
-      : "Sip! Pengingat harian jam 20:00 WIB sudah aktif di HP kamu.";
+      ? `Pengingat jam 20:00 WIB aktif. Streak ${streak} hari kamu aman!`
+      : "Pengingat jam 20:00 WIB sudah aktif di HP kamu.";
 
   const testPayload = JSON.stringify({
-    title: "🔔 Notifikasi Berhasil Terhubung!",
+    title: "🔔 Tes Notifikasi Story Finance",
     body: bodyMessage,
     url: "/profile",
   });

@@ -8,6 +8,8 @@ import { QuickAddModal } from "@/components/cashflow/QuickAddModal";
 import { RetroStreakFlame } from "@/components/retro/RetroStreakFlame";
 import { RetroXpBar } from "@/components/retro/RetroXpBar";
 import { BadgeGrid } from "@/components/gamification/BadgeGrid";
+import { LevelTiersModal } from "@/components/gamification/LevelTiersModal";
+import { getTierGroup } from "@/lib/gamification/xp";
 import { GamificationProfileResponse } from "@/app/actions/gamification";
 import { Category, Profile } from "@/types";
 import { createClient } from "@/lib/supabase/client";
@@ -54,6 +56,7 @@ export function ProfileView({
   const [, startTransition] = useTransition();
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const [isLevelTiersModalOpen, setIsLevelTiersModalOpen] = useState(false);
 
   // Daily Reminder States
   const [isReminderEnabled, setIsReminderEnabled] = useState(
@@ -102,7 +105,7 @@ export function ProfileView({
         setIsReminderEnabled(true);
         setReminderFeedback({
           type: "success",
-          message: "Pengingat jam 20:00 WIB berhasil aktif di perangkat ini!",
+          message: "Pengingat jam 20:00 WIB sudah aktif.",
         });
         startTransition(() => {
           router.refresh();
@@ -114,7 +117,7 @@ export function ProfileView({
           setIsReminderEnabled(false);
           setReminderFeedback({
             type: "success",
-            message: "Pengingat harian berhasil dinonaktifkan.",
+            message: "Pengingat dinonaktifkan.",
           });
           startTransition(() => {
             router.refresh();
@@ -140,7 +143,7 @@ export function ProfileView({
     if (result.success) {
       setReminderFeedback({
         type: "success",
-        message: "Notifikasi percobaan berhasil dikirim! Periksa bar notifikasi perangkat Anda.",
+        message: "Notifikasi tes terkirim. Cek bar notifikasi HP kamu ya.",
       });
     } else {
       setReminderFeedback({
@@ -164,6 +167,7 @@ export function ProfileView({
   const longestStreak = gamification?.longestStreak ?? 0;
   const totalXp = gamification?.totalXp ?? 0;
   const currentLevel = gamification?.currentLevel ?? 1;
+  const currentTier = getTierGroup(currentLevel);
 
   return (
     <div className="flex flex-col flex-1 min-h-screen bg-slate-50/50">
@@ -171,12 +175,29 @@ export function ProfileView({
       <Header currentStreak={currentStreak} totalXp={totalXp} />
 
       <main className="flex-1 p-4 space-y-4 max-w-md mx-auto w-full pb-24">
-        {/* User Card */}
+        {/* User Card with Dynamic Tier Border & Clickable Title */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold text-lg shadow-retro-sm shrink-0">
-              {displayName.charAt(0).toUpperCase()}
+          <div className="flex items-center gap-3.5 min-w-0">
+            {/* Avatar with Dynamic Tier Ring & Rank Symbol */}
+            <div className="relative shrink-0">
+              <div
+                className={cn(
+                  "w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold text-lg shadow-retro-sm transition-all duration-300",
+                  currentTier.ringClass
+                )}
+              >
+                {displayName.charAt(0).toUpperCase()}
+              </div>
+              {/* Corner Tier Emblem */}
+              <div
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white text-slate-900 shadow-xs flex items-center justify-center text-[10px] border border-slate-200 select-none cursor-pointer"
+                onClick={() => setIsLevelTiersModalOpen(true)}
+                title={`Tier ${currentTier.name}`}
+              >
+                {currentTier.borderSymbol}
+              </div>
             </div>
+
             <div className="min-w-0">
               <h2 className="text-sm font-bold text-slate-900 truncate leading-tight">
                 {displayName}
@@ -184,11 +205,20 @@ export function ProfileView({
               <span className="text-xs text-slate-400 truncate block mt-0.5">
                 {userEmail}
               </span>
-              <div className="inline-flex items-center gap-1 mt-1 text-[10px] font-pixel text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+
+              {/* Clickable Level & Title Badge */}
+              <button
+                type="button"
+                onClick={() => setIsLevelTiersModalOpen(true)}
+                className="inline-flex items-center gap-1.5 mt-1.5 text-[10px] font-pixel text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 active:scale-95 px-2 py-0.5 rounded border border-emerald-200 transition-all cursor-pointer group shadow-2xs"
+              >
                 <span>Lv.{currentLevel}</span>
                 <span>•</span>
                 <span>{gamification?.levelTitle || "Pemula Hemat"}</span>
-              </div>
+                <span className="text-[9px] text-emerald-500 group-hover:translate-x-0.5 transition-transform font-sans">
+                  ➔
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -258,7 +288,12 @@ export function ProfileView({
         </div>
 
         {/* 8-bit XP Progress Bar Section */}
-        <RetroXpBar totalXp={totalXp} level={currentLevel} variant="card" />
+        <RetroXpBar
+          totalXp={totalXp}
+          level={currentLevel}
+          variant="card"
+          onViewTiersClick={() => setIsLevelTiersModalOpen(true)}
+        />
 
         {/* Badges Grid Section */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
@@ -280,7 +315,7 @@ export function ProfileView({
                   </span>
                 </h3>
                 <p className="text-[11px] text-slate-500">
-                  Notifikasi HP jika belum mencatat pengeluaran
+                  Kirim notifikasi jika belum mencatat pengeluaran hari ini
                 </p>
               </div>
             </div>
@@ -310,7 +345,7 @@ export function ProfileView({
           <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
             <span className="text-[11px] flex items-center gap-1.5 text-slate-400">
               <Clock className="w-3.5 h-3.5" />
-              <span>Otomatis lewati jika sudah catat hari ini</span>
+              <span>Otomatis dilewati jika kamu sudah catat hari ini</span>
             </span>
 
             {isReminderEnabled && (
@@ -375,6 +410,15 @@ export function ProfileView({
             router.refresh();
           });
         }}
+      />
+
+      {/* Level Tiers & Titles RPG Modal */}
+      <LevelTiersModal
+        isOpen={isLevelTiersModalOpen}
+        onClose={() => setIsLevelTiersModalOpen(false)}
+        currentLevel={currentLevel}
+        totalXp={totalXp}
+        displayName={displayName}
       />
 
       {/* Mobile Bottom Navigation */}
