@@ -67,7 +67,7 @@ export function LevelTiersModal({
                 >
                   {displayName.charAt(0).toUpperCase()}
                 </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white flex items-center justify-center border border-slate-200 shadow-2xs">
                   <RetroTierIcon tierId={currentTier.id} size={10} />
                 </div>
               </div>

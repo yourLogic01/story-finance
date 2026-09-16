@@ -1,8 +1,9 @@
 "use client";
 
-import { getLevelInfo } from "@/lib/gamification/xp";
+import { getLevelInfo, getTierGroup } from "@/lib/gamification/xp";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { RetroTierIcon } from "./RetroTierIcon";
 
 interface RetroXpBarProps {
   totalXp: number;
@@ -68,6 +69,7 @@ export function RetroXpBar({
   // Segmented 8-bit block bar (10 segments)
   const totalBlocks = 10;
   const filledBlocks = Math.round((levelInfo.progressPercent / 100) * totalBlocks);
+  const currentTier = getTierGroup(displayLevel);
 
   return (
     <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-3">
@@ -76,13 +78,18 @@ export function RetroXpBar({
         <div
           onClick={onViewTiersClick}
           className={cn(
-            "flex items-center gap-2",
+            "flex items-center gap-2.5",
             onViewTiersClick &&
               "cursor-pointer group select-none active:scale-95 transition-all"
           )}
         >
-          <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-pixel text-xs shadow-xs group-hover:bg-emerald-600 transition-colors">
-            {displayLevel}
+          <div className="relative shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-pixel text-xs shadow-xs group-hover:bg-emerald-600 transition-colors">
+              {displayLevel}
+            </div>
+            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-2xs">
+              <RetroTierIcon tierId={currentTier.id} size={10} />
+            </div>
           </div>
           <div>
             <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider flex items-center gap-1">

@@ -9,6 +9,7 @@ import { RetroStreakFlame } from "@/components/retro/RetroStreakFlame";
 import { RetroXpBar } from "@/components/retro/RetroXpBar";
 import { BadgeGrid } from "@/components/gamification/BadgeGrid";
 import { LevelTiersModal } from "@/components/gamification/LevelTiersModal";
+import { RetroTierIcon } from "@/components/retro/RetroTierIcon";
 import { getTierGroup } from "@/lib/gamification/xp";
 import { GamificationProfileResponse } from "@/app/actions/gamification";
 import { Category, Profile } from "@/types";
@@ -190,11 +191,11 @@ export function ProfileView({
               </div>
               {/* Corner Tier Emblem */}
               <div
-                className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white text-slate-900 shadow-xs flex items-center justify-center text-[10px] border border-slate-200 select-none cursor-pointer"
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white shadow-xs flex items-center justify-center border border-slate-200 select-none cursor-pointer hover:scale-105 transition-transform"
                 onClick={() => setIsLevelTiersModalOpen(true)}
                 title={`Tier ${currentTier.name}`}
               >
-                {currentTier.borderSymbol}
+                <RetroTierIcon tierId={currentTier.id} size={12} />
               </div>
             </div>
 
@@ -212,6 +213,7 @@ export function ProfileView({
                 onClick={() => setIsLevelTiersModalOpen(true)}
                 className="inline-flex items-center gap-1.5 mt-1.5 text-[10px] font-pixel text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 active:scale-95 px-2 py-0.5 rounded border border-emerald-200 transition-all cursor-pointer group shadow-2xs"
               >
+                <RetroTierIcon tierId={currentTier.id} size={11} />
                 <span>Lv.{currentLevel}</span>
                 <span>•</span>
                 <span>{gamification?.levelTitle || "Pemula Hemat"}</span>

@@ -17,7 +17,7 @@ export function RetroTierIcon({
 }: RetroTierIconProps) {
   switch (tierId) {
     case "bronze":
-      // 8-bit Pixel Coin / Seed
+      // 8-bit Pixel Sprout 🌱 (Tunas Hijau Bertumbuh)
       return (
         <svg
           width={size}
@@ -28,23 +28,24 @@ export function RetroTierIcon({
           className={className}
           style={{ shapeRendering: "crispEdges" }}
         >
-          {/* Coin Outer Border */}
-          <rect x="5" y="2" width="6" height="1" fill="#78350F" />
-          <rect x="5" y="13" width="6" height="1" fill="#78350F" />
-          <rect x="3" y="3" width="2" height="1" fill="#78350F" />
-          <rect x="11" y="3" width="2" height="1" fill="#78350F" />
-          <rect x="3" y="12" width="2" height="1" fill="#78350F" />
-          <rect x="11" y="12" width="2" height="1" fill="#78350F" />
-          <rect x="2" y="4" width="1" height="8" fill="#78350F" />
-          <rect x="13" y="4" width="1" height="8" fill="#78350F" />
-          {/* Coin Body (Bronze) */}
-          <rect x="4" y="4" width="8" height="8" fill="#D97706" />
-          <rect x="5" y="3" width="6" height="1" fill="#F59E0B" />
-          <rect x="3" y="5" width="1" height="6" fill="#F59E0B" />
-          <rect x="5" y="5" width="6" height="6" fill="#B45309" />
-          {/* Inner Seed / Highlight */}
-          <rect x="7" y="6" width="2" height="4" fill="#FDE68A" />
-          <rect x="6" y="7" width="4" height="2" fill="#FDE68A" />
+          {/* Soil Base */}
+          <rect x="4" y="13" width="8" height="2" fill="#78350F" />
+          <rect x="5" y="12" width="6" height="1" fill="#92400E" />
+          {/* Stem */}
+          <rect x="7" y="7" width="2" height="5" fill="#15803D" />
+          <rect x="7" y="6" width="2" height="2" fill="#22C55E" />
+          {/* Left Leaf */}
+          <rect x="3" y="6" width="3" height="2" fill="#15803D" />
+          <rect x="2" y="7" width="2" height="2" fill="#15803D" />
+          <rect x="4" y="5" width="3" height="2" fill="#22C55E" />
+          <rect x="3" y="6" width="2" height="1" fill="#4ADE80" />
+          <rect x="5" y="5" width="1" height="1" fill="#86EFAC" />
+          {/* Right Leaf */}
+          <rect x="9" y="4" width="3" height="2" fill="#15803D" />
+          <rect x="11" y="5" width="2" height="2" fill="#15803D" />
+          <rect x="8" y="3" width="3" height="2" fill="#22C55E" />
+          <rect x="9" y="4" width="2" height="1" fill="#4ADE80" />
+          <rect x="9" y="3" width="1" height="1" fill="#86EFAC" />
         </svg>
       );
 
