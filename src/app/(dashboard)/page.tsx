@@ -4,6 +4,7 @@ import { Category, TransactionWithCategory, GamificationProfile } from "@/types"
 import { getTodayDateString, getCurrentMonthYear } from "@/lib/utils/date";
 import { getMonthlySummary } from "@/app/actions/summary";
 import { getSelfRewardAllowance } from "@/app/actions/budgets";
+import { isTodayNoSpend } from "@/app/actions/no-spend";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
@@ -27,6 +28,7 @@ export default async function DashboardPage() {
     monthlySummary,
     selfRewardAllowance,
     { data: gamification },
+    isNoSpendToday,
   ] = await Promise.all([
     supabase
       .from("categories")
@@ -45,6 +47,7 @@ export default async function DashboardPage() {
       .select("*")
       .eq("user_id", user.id)
       .maybeSingle(),
+    isTodayNoSpend(),
   ]);
 
   const categories = (rawCategories || []) as Category[];
@@ -57,6 +60,7 @@ export default async function DashboardPage() {
       monthlySummary={monthlySummary}
       selfRewardAllowance={selfRewardAllowance}
       gamification={gamification as GamificationProfile | null}
+      isNoSpendToday={isNoSpendToday}
     />
   );
 }

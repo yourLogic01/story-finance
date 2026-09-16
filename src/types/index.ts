@@ -64,6 +64,14 @@ export interface GamificationProfile {
   updated_at: string;
 }
 
+export interface NoSpendDay {
+  id: string;
+  user_id: string;
+  date: string;
+  note: string | null;
+  created_at: string;
+}
+
 export interface Badge {
   id: string;
   title: string;

@@ -95,6 +95,20 @@ export const KNOWN_BADGES: BadgeDefinition[] = [
     icon: "star",
     xp_reward: 200,
   },
+  {
+    id: "no_spend_first",
+    title: "Puasa Jajan Pertama",
+    description: "Berhasil lewati 1 hari tanpa keluar uang sepeser pun",
+    icon: "shield",
+    xp_reward: 50,
+  },
+  {
+    id: "no_spend_7",
+    title: "Disiplin Hemat 7 Hari",
+    description: "Tercatat 7 hari tanpa pengeluaran sama sekali",
+    icon: "shield-check",
+    xp_reward: 150,
+  },
 ];
 
 export interface BadgeEvaluationContext {
@@ -104,6 +118,7 @@ export interface BadgeEvaluationContext {
   hasBudgetConfigured?: boolean;
   isSelfRewardSafe?: boolean;
   isBudgetHero?: boolean;
+  noSpendDaysCount?: number;
 }
 
 /**
@@ -129,6 +144,10 @@ export function evaluateEligibleBadges(context: BadgeEvaluationContext): string[
   if (context.hasBudgetConfigured) eligibleIds.push("budget_builder");
   if (context.isSelfRewardSafe) eligibleIds.push("self_reward_safe");
   if (context.isBudgetHero) eligibleIds.push("budget_hero");
+
+  // 4. No-Spend Days milestones
+  if ((context.noSpendDaysCount || 0) >= 1) eligibleIds.push("no_spend_first");
+  if ((context.noSpendDaysCount || 0) >= 7) eligibleIds.push("no_spend_7");
 
   return eligibleIds;
 }

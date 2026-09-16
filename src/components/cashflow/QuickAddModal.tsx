@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input";
 import { CategorySelector } from "./CategorySelector";
 import { Category } from "@/types";
 import { createTransaction } from "@/app/actions/transactions";
+import { logNoSpendDay } from "@/app/actions/no-spend";
 import { getTodayDateString } from "@/lib/utils/date";
 import { formatIDR, parseIDRInput } from "@/lib/utils/currency";
 import { enqueueOfflineTransaction } from "@/lib/offline/queue";
-import { Flame, Sparkles, Check, WifiOff } from "lucide-react";
+import { Flame, Sparkles, Check, WifiOff, ShieldCheck } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface QuickAddModalProps {
   isOpen: boolean;
@@ -38,7 +40,38 @@ export function QuickAddModal({
   const [rewardCelebration, setRewardCelebration] = useState<{
     xp: number;
     badge?: { title: string; icon: string } | null;
+    isNoSpend?: boolean;
   } | null>(null);
+
+  const handleNoSpendSubmit = async () => {
+    setLoading(true);
+    setErrorMsg(null);
+    try {
+      const result = await logNoSpendDay(date);
+      setLoading(false);
+      if (!result.success) {
+        setErrorMsg(result.error || "Gagal mencatat hari bebas belanja.");
+      } else if (result.alreadyLogged) {
+        setErrorMsg("Hari ini sudah tercatat sebagai Hari Bebas Belanja.");
+      } else {
+        setRewardCelebration({
+          xp: result.gamification?.awardedXp ?? 10,
+          badge: result.gamification?.unlockedBadge,
+          isNoSpend: true,
+        });
+
+        setTimeout(() => {
+          setRewardCelebration(null);
+          resetForm();
+          onClose();
+          onSuccess?.();
+        }, 1800);
+      }
+    } catch {
+      setLoading(false);
+      setErrorMsg("Terjadi kesalahan saat mencatat.");
+    }
+  };
 
   // Filter categories by active type (expense or income)
   const filteredCategories = categories.filter((c) => c.type === type);
@@ -188,14 +221,25 @@ export function QuickAddModal({
           </div>
         ) : rewardCelebration ? (
           <div className="py-8 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-200">
-            <div className="w-16 h-16 rounded-2xl bg-amber-400 border-2 border-slate-900 shadow-retro flex items-center justify-center mb-3 animate-bounce">
-              <Flame className="w-9 h-9 text-slate-950 fill-amber-300" />
+            <div
+              className={cn(
+                "w-16 h-16 rounded-2xl border-2 border-slate-900 shadow-retro flex items-center justify-center mb-3 animate-bounce",
+                rewardCelebration.isNoSpend ? "bg-emerald-400" : "bg-amber-400"
+              )}
+            >
+              {rewardCelebration.isNoSpend ? (
+                <ShieldCheck className="w-9 h-9 text-slate-950 fill-emerald-200" />
+              ) : (
+                <Flame className="w-9 h-9 text-slate-950 fill-amber-300" />
+              )}
             </div>
-            <h4 className="font-pixel text-xs text-slate-900 mb-1">
-              TRANSAKSI TERCATAT!
+            <h4 className="font-pixel text-xs text-slate-900 mb-1 uppercase">
+              {rewardCelebration.isNoSpend ? "Hari Bebas Belanja" : "Transaksi Tercatat"}
             </h4>
             <p className="text-xs text-emerald-600 font-bold mb-2">
-              +{rewardCelebration.xp} XP Didapatkan!
+              {rewardCelebration.isNoSpend
+                ? `Rp 0 keluar hari ini. Streak aman & +${rewardCelebration.xp} XP!`
+                : `+${rewardCelebration.xp} XP didapatkan!`}
             </p>
             {rewardCelebration.badge && (
               <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-center gap-2">
@@ -325,6 +369,19 @@ export function QuickAddModal({
                 </span>
               )}
             </Button>
+
+            {/* No-Spend Day Fast Option */}
+            <div className="pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={handleNoSpendSubmit}
+                disabled={loading}
+                className="w-full py-2.5 px-3 rounded-xl border border-dashed border-emerald-300 bg-emerald-50/70 hover:bg-emerald-100 active:scale-[0.99] text-emerald-800 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+              >
+                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>Hari ini tidak jajan / pengeluaran Rp 0</span>
+              </button>
+            </div>
           </form>
         )}
       </DialogContent>

@@ -92,13 +92,8 @@ export function RetroXpBar({
             </div>
           </div>
           <div>
-            <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider flex items-center gap-1">
-              <span>Level {displayLevel}</span>
-              {onViewTiersClick && (
-                <span className="text-[9px] font-pixel text-emerald-600 bg-emerald-50 px-1 rounded border border-emerald-200/60 group-hover:bg-emerald-100">
-                  Lihat Gelar ➔
-                </span>
-              )}
+            <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
+              Level {displayLevel}
             </span>
             <h4 className="text-xs font-bold text-slate-800 group-hover:text-emerald-700 transition-colors">
               {levelInfo.title}

@@ -17,6 +17,8 @@ import {
   SelfRewardAllowance,
 } from "@/types";
 import { Plus } from "lucide-react";
+import { logNoSpendDay, cancelNoSpendDay } from "@/app/actions/no-spend";
+import { getTodayDateString } from "@/lib/utils/date";
 
 interface DashboardViewProps {
   categories: Category[];
@@ -24,6 +26,7 @@ interface DashboardViewProps {
   monthlySummary: MonthlySummary;
   selfRewardAllowance: SelfRewardAllowance;
   gamification: GamificationProfile | null;
+  isNoSpendToday?: boolean;
 }
 
 export function DashboardView({
@@ -32,12 +35,34 @@ export function DashboardView({
   monthlySummary,
   selfRewardAllowance,
   gamification,
+  isNoSpendToday = false,
 }: DashboardViewProps) {
   const router = useRouter();
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const [isNoSpendLoading, setIsNoSpendLoading] = useState(false);
 
   const handleTransactionSuccess = () => {
     router.refresh();
+  };
+
+  const handleMarkNoSpend = async () => {
+    setIsNoSpendLoading(true);
+    try {
+      await logNoSpendDay();
+      router.refresh();
+    } finally {
+      setIsNoSpendLoading(false);
+    }
+  };
+
+  const handleCancelNoSpend = async () => {
+    setIsNoSpendLoading(true);
+    try {
+      await cancelNoSpendDay(getTodayDateString());
+      router.refresh();
+    } finally {
+      setIsNoSpendLoading(false);
+    }
   };
 
   return (
@@ -66,7 +91,13 @@ export function DashboardView({
         </button>
 
         {/* Today's Transactions Feed */}
-        <TodayTransactionList transactions={todayTransactions} />
+        <TodayTransactionList
+          transactions={todayTransactions}
+          isNoSpendToday={isNoSpendToday}
+          onMarkNoSpend={handleMarkNoSpend}
+          onCancelNoSpend={handleCancelNoSpend}
+          isNoSpendLoading={isNoSpendLoading}
+        />
 
         {/* Category Breakdown (T030) */}
         <CategoryBreakdown

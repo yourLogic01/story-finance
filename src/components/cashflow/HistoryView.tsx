@@ -7,7 +7,7 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { TransactionItem } from "@/components/cashflow/TransactionItem";
 import { EditTransactionModal } from "@/components/cashflow/EditTransactionModal";
 import { QuickAddModal } from "@/components/cashflow/QuickAddModal";
-import { Category, TransactionWithCategory, GamificationProfile } from "@/types";
+import { Category, TransactionWithCategory, GamificationProfile, NoSpendDay } from "@/types";
 import { deleteTransaction } from "@/app/actions/transactions";
 import { formatDisplayDate, getMonthName } from "@/lib/utils/date";
 import { formatIDR } from "@/lib/utils/currency";
@@ -19,6 +19,7 @@ import {
   History,
   TrendingDown,
   TrendingUp,
+  ShieldCheck,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -27,6 +28,7 @@ interface HistoryViewProps {
   categories: Category[];
   initialTransactions: TransactionWithCategory[];
   gamification: GamificationProfile | null;
+  noSpendDays?: NoSpendDay[];
   currentYear: number;
   currentMonth: number;
 }
@@ -35,6 +37,7 @@ export function HistoryView({
   categories,
   initialTransactions,
   gamification,
+  noSpendDays = [],
   currentYear: initYear,
   currentMonth: initMonth,
 }: HistoryViewProps) {
@@ -195,6 +198,21 @@ export function HistoryView({
             </span>
           </div>
         </div>
+
+        {/* No-Spend Days Achievement Pill */}
+        {noSpendDays && noSpendDays.length > 0 && (
+          <div className="p-2.5 px-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 flex items-center justify-between shadow-2xs">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span className="text-xs font-semibold text-emerald-950">
+                Hari Bebas Belanja
+              </span>
+            </div>
+            <span className="text-[10px] font-pixel font-bold text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-200 shadow-2xs">
+              {noSpendDays.length} Hari Bebas Belanja 🛡️
+            </span>
+          </div>
+        )}
 
         {/* Search Input */}
         <div className="relative">

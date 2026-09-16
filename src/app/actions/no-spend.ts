@@ -1,70 +1,79 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { createTransactionSchema } from "@/lib/validations/transaction";
+import { getTodayDateString, getMonthDateRange } from "@/lib/utils/date";
 import { calculateStreak } from "@/lib/gamification/streak";
 import { calculateDailyLogXp, getLevelInfo } from "@/lib/gamification/xp";
 import { evaluateEligibleBadges, KNOWN_BADGES } from "@/lib/gamification/badges";
 import { revalidatePath } from "next/cache";
+import { NoSpendDay } from "@/types";
 
-export async function createTransaction(formData: unknown) {
+export interface LogNoSpendResult {
+  success: boolean;
+  error?: string;
+  alreadyLogged?: boolean;
+  gamification?: {
+    awardedXp: number;
+    newStreak: number;
+    unlockedBadge?: { id: string; title: string; icon: string } | null;
+  };
+}
+
+/**
+ * Log a date as a No-Spend Day (Hari Bebas Belanja).
+ * Protects and advances the user's streak, awards XP, and checks No-Spend milestones.
+ */
+export async function logNoSpendDay(
+  targetDate?: string,
+  note?: string
+): Promise<LogNoSpendResult> {
   const supabase = await createClient();
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { success: false, error: "Tidak terautentikasi. Silakan masuk kembali." };
+    return { success: false, error: "Silakan login terlebih dahulu." };
   }
 
-  const parseResult = createTransactionSchema.safeParse(formData);
-  if (!parseResult.success) {
-    return {
-      success: false,
-      error: parseResult.error.errors[0]?.message || "Data transaksi tidak valid",
-    };
-  }
+  const date = targetDate || getTodayDateString();
 
-  const { amount, type, categoryId, date, note } = parseResult.data;
+  // 1. Check if already marked as No-Spend Day
+  try {
+    const { data: existing } = await supabase
+      .from("no_spend_days")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("date", date)
+      .maybeSingle();
 
-  // 1. Insert transaction
-  const { data: transaction, error: txError } = await supabase
-    .from("transactions")
-    .insert({
-      user_id: user.id,
-      category_id: categoryId,
-      type,
-      amount,
-      date,
-      note: note || null,
-    })
-    .select("*, category:categories(*)")
-    .single();
-
-  if (txError || !transaction) {
-    return {
-      success: false,
-      error: txError?.message || "Gagal menyimpan transaksi.",
-    };
-  }
-
-  // If this date was previously marked as No-Spend Day, remove it since an expense occurred
-  if (type === "expense") {
-    try {
-      await supabase
-        .from("no_spend_days")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("date", date);
-    } catch {
-      // Non-blocking
+    if (existing) {
+      return {
+        success: true,
+        alreadyLogged: true,
+        error: "Hari ini sudah ditandai sebagai Hari Bebas Belanja.",
+      };
     }
+  } catch (e) {
+    // If table doesn't exist yet, non-fatal
+    console.warn("no_spend_days query warning:", e);
   }
 
-  // 2. Evaluate Gamification (Streaks, XP, Badges)
+  // 2. Insert into no_spend_days table
+  try {
+    await supabase.from("no_spend_days").insert({
+      user_id: user.id,
+      date,
+      note: note?.trim() || "Hari Bebas Belanja (Rp 0)",
+    });
+  } catch (err) {
+    console.warn("Could not insert into no_spend_days table:", err);
+  }
+
+  // 3. Evaluate Gamification (Streak, XP, Badges)
   let awardedXp = 0;
   let unlockedBadge: { id: string; title: string; icon: string } | null = null;
+  let newStreak = 1;
 
   try {
     let { data: profile } = await supabase
@@ -89,13 +98,15 @@ export async function createTransaction(formData: unknown) {
     }
 
     if (profile) {
-      // 2a. Calculate Streak Progression
+      // 3a. Calculate Streak Progression
       const streakResult = calculateStreak(
         profile.last_logged_date,
         date,
         profile.current_streak,
         profile.longest_streak
       );
+
+      newStreak = streakResult.newStreak;
 
       // Base daily logging XP reward (with x2 multiplier after 7 days streak!)
       if (streakResult.isNewDayLog) {
@@ -105,28 +116,13 @@ export async function createTransaction(formData: unknown) {
 
       let currentTotalXp = profile.total_xp + awardedXp;
 
-      // 2b. Check context metrics for badges
+      // 3b. Count total transactions & no spend days
       const { count: txCount } = await supabase
         .from("transactions")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id);
 
-      const { data: incomeTx } = await supabase
-        .from("transactions")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("type", "income")
-        .limit(1)
-        .maybeSingle();
-
-      const { data: userBudget } = await supabase
-        .from("budgets")
-        .select("id")
-        .eq("user_id", user.id)
-        .limit(1)
-        .maybeSingle();
-
-      let noSpendCount = 0;
+      let noSpendCount = 1;
       try {
         const { count: nsCount } = await supabase
           .from("no_spend_days")
@@ -134,15 +130,13 @@ export async function createTransaction(formData: unknown) {
           .eq("user_id", user.id);
         if (nsCount) noSpendCount = nsCount;
       } catch {
-        // Non-blocking
+        // Fallback
       }
 
-      // 2c. Evaluate eligible badges
+      // 3c. Evaluate eligible badges
       const eligibleBadgeIds = evaluateEligibleBadges({
-        totalTransactions: txCount || 1,
+        totalTransactions: txCount || 0,
         currentStreak: streakResult.newStreak,
-        hasIncomeTransaction: Boolean(incomeTx) || type === "income",
-        hasBudgetConfigured: Boolean(userBudget),
         noSpendDaysCount: noSpendCount,
       });
 
@@ -161,7 +155,6 @@ export async function createTransaction(formData: unknown) {
             .eq("id", badgeId)
             .maybeSingle();
 
-          // If badge record is not yet inserted in DB, upsert from catalog
           if (!badgeInfo) {
             const known = KNOWN_BADGES.find((kb) => kb.id === badgeId);
             if (known) {
@@ -187,7 +180,7 @@ export async function createTransaction(formData: unknown) {
         }
       }
 
-      // 2d. Calculate level tier
+      // 3d. Update level info and gamification profile
       const levelInfo = getLevelInfo(currentTotalXp);
 
       await supabase
@@ -203,8 +196,7 @@ export async function createTransaction(formData: unknown) {
         .eq("user_id", user.id);
     }
   } catch (err) {
-    // Non-blocking: gamification failure should not abort the saved financial record
-    console.error("Gamification calculation error:", err);
+    console.error("Gamification evaluation error in logNoSpendDay:", err);
   }
 
   revalidatePath("/");
@@ -213,93 +205,104 @@ export async function createTransaction(formData: unknown) {
 
   return {
     success: true,
-    data: transaction,
     gamification: {
       awardedXp,
+      newStreak,
       unlockedBadge,
     },
   };
 }
 
-export async function updateTransaction(id: string, formData: unknown) {
+/**
+ * Check if today is marked as a No-Spend Day for current user.
+ */
+export async function isTodayNoSpend(): Promise<boolean> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return false;
+
+  const todayStr = getTodayDateString();
+
+  try {
+    const { data } = await supabase
+      .from("no_spend_days")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("date", todayStr)
+      .maybeSingle();
+
+    return Boolean(data);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Fetch all No-Spend Days within a specific month.
+ */
+export async function getMonthlyNoSpendDays(
+  year: number,
+  month: number
+): Promise<NoSpendDay[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return [];
+
+  const { startDate, endDate } = getMonthDateRange(year, month);
+
+  try {
+    const { data, error } = await supabase
+      .from("no_spend_days")
+      .select("*")
+      .eq("user_id", user.id)
+      .gte("date", startDate)
+      .lte("date", endDate)
+      .order("date", { ascending: false });
+
+    if (error || !data) return [];
+    return data as NoSpendDay[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Cancel or remove a No-Spend Day mark for a specific date.
+ */
+export async function cancelNoSpendDay(
+  targetDate: string
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { success: false, error: "Tidak terautentikasi. Silakan masuk kembali." };
+    return { success: false, error: "Silakan login terlebih dahulu." };
   }
 
-  const parseResult = createTransactionSchema.safeParse(formData);
-  if (!parseResult.success) {
-    return {
-      success: false,
-      error: parseResult.error.errors[0]?.message || "Data transaksi tidak valid",
-    };
+  try {
+    const { error } = await supabase
+      .from("no_spend_days")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("date", targetDate);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath("/");
+    revalidatePath("/history");
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Gagal membatalkan.";
+    return { success: false, error: msg };
   }
-
-  const { amount, type, categoryId, date, note } = parseResult.data;
-
-  const { data: updated, error } = await supabase
-    .from("transactions")
-    .update({
-      category_id: categoryId,
-      type,
-      amount,
-      date,
-      note: note || null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", id)
-    .eq("user_id", user.id)
-    .select("*, category:categories(*)")
-    .single();
-
-  if (error || !updated) {
-    return {
-      success: false,
-      error: error?.message || "Gagal memperbarui transaksi.",
-    };
-  }
-
-  revalidatePath("/");
-  revalidatePath("/history");
-
-  return {
-    success: true,
-    data: updated,
-  };
 }
-
-export async function deleteTransaction(id: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { success: false, error: "Tidak terautentikasi. Silakan masuk kembali." };
-  }
-
-  const { error } = await supabase
-    .from("transactions")
-    .delete()
-    .eq("id", id)
-    .eq("user_id", user.id);
-
-  if (error) {
-    return {
-      success: false,
-      error: error.message || "Gagal menghapus transaksi.",
-    };
-  }
-
-  revalidatePath("/");
-  revalidatePath("/history");
-
-  return {
-    success: true,
-  };
-}
-
