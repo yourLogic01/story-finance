@@ -29,6 +29,7 @@ export function DashboardWishlistCard({
   return (
     <Link
       href="/wishlist"
+      prefetch={true}
       className="block p-3.5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-white shadow-retro-sm transition-all active:scale-[0.99] group relative overflow-hidden"
     >
       {/* Header */}

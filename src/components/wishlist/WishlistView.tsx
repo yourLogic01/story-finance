@@ -69,6 +69,7 @@ export function WishlistView({ initialData, categories }: WishlistViewProps) {
       <header className="sticky top-0 z-30 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-3 flex items-center justify-between">
         <Link
           href="/"
+          prefetch={true}
           className="inline-flex items-center gap-1.5 text-xs font-pixel text-slate-300 hover:text-white transition-colors active:scale-95"
         >
           <div className="w-7 h-7 rounded-lg bg-slate-900 border border-slate-700/80 flex items-center justify-center text-slate-300">

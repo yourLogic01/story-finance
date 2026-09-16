@@ -1,8 +1,9 @@
 // Story Finance Service Worker (Offline App Shell & Asset Caching)
 
-const CACHE_NAME = "story-finance-v2";
+const CACHE_NAME = "story-finance-v3";
 const STATIC_ASSETS = [
   "/",
+  "/wishlist",
   "/manifest.webmanifest",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
