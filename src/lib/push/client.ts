@@ -35,7 +35,8 @@ export function getNotificationPermissionState(): NotificationPermission | "unsu
 export async function getExistingPushSubscription(): Promise<PushSubscription | null> {
   if (!isPushNotificationSupported()) return null;
   try {
-    const registration = await navigator.serviceWorker.ready;
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (!registration) return null;
     return await registration.pushManager.getSubscription();
   } catch (error) {
     console.error("Gagal memeriksa push subscription:", error);
@@ -75,14 +76,28 @@ export async function subscribeToWebPush(): Promise<
     if (!vapidPublicKey) {
       return {
         success: false,
-        error: "Kunci VAPID Public belum dikonfigurasi pada environment.",
+        error: "Kunci VAPID Public belum dikonfigurasi di Environment Variables.",
       };
     }
 
     const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
 
-    // 2. Wait for Service Worker registration
-    const registration = await navigator.serviceWorker.ready;
+    // 2. Ensure Service Worker is registered & ready
+    let registration = await navigator.serviceWorker.getRegistration();
+    if (!registration) {
+      registration = await navigator.serviceWorker.register("/sw.js");
+    }
+
+    // Wait for ready with an 8-second safety timeout
+    await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Timeout: Service Worker belum siap di peramban ini.")),
+          8000
+        )
+      ),
+    ]);
 
     // 3. Subscribe via pushManager
     let subscription = await registration.pushManager.getSubscription();

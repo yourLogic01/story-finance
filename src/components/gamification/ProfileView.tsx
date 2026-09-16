@@ -80,44 +80,55 @@ export function ProfileView({
     setReminderFeedback(null);
     setIsLoadingReminder(true);
 
-    if (!isReminderEnabled) {
-      const result = await subscribeToWebPush();
-      if (!result.success) {
-        setReminderFeedback({ type: "error", message: result.error });
-        setIsLoadingReminder(false);
-        return;
-      }
+    try {
+      if (!isReminderEnabled) {
+        const result = await subscribeToWebPush();
+        if (!result.success) {
+          setReminderFeedback({ type: "error", message: result.error });
+          setIsLoadingReminder(false);
+          return;
+        }
 
-      const saveRes = await savePushSubscription(result.data);
-      if (!saveRes.success) {
-        setReminderFeedback({
-          type: "error",
-          message: saveRes.error || "Gagal menyimpan langganan notifikasi.",
-        });
-        setIsLoadingReminder(false);
-        return;
-      }
+        const saveRes = await savePushSubscription(result.data);
+        if (!saveRes.success) {
+          setReminderFeedback({
+            type: "error",
+            message: saveRes.error || "Gagal menyimpan langganan notifikasi.",
+          });
+          setIsLoadingReminder(false);
+          return;
+        }
 
-      setIsReminderEnabled(true);
-      setReminderFeedback({
-        type: "success",
-        message: "Pengingat jam 20:00 WIB berhasil aktif di perangkat ini!",
-      });
-    } else {
-      const unsubs = await unsubscribeFromWebPush();
-      if (unsubs.success) {
-        await removePushSubscription(unsubs.endpoint);
-        setIsReminderEnabled(false);
+        setIsReminderEnabled(true);
         setReminderFeedback({
           type: "success",
-          message: "Pengingat harian berhasil dinonaktifkan.",
+          message: "Pengingat jam 20:00 WIB berhasil aktif di perangkat ini!",
+        });
+        startTransition(() => {
+          router.refresh();
         });
       } else {
-        setReminderFeedback({ type: "error", message: unsubs.error });
+        const unsubs = await unsubscribeFromWebPush();
+        if (unsubs.success) {
+          await removePushSubscription(unsubs.endpoint);
+          setIsReminderEnabled(false);
+          setReminderFeedback({
+            type: "success",
+            message: "Pengingat harian berhasil dinonaktifkan.",
+          });
+          startTransition(() => {
+            router.refresh();
+          });
+        } else {
+          setReminderFeedback({ type: "error", message: unsubs.error });
+        }
       }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Terjadi kesalahan saat mengubah pengaturan.";
+      setReminderFeedback({ type: "error", message: msg });
+    } finally {
+      setIsLoadingReminder(false);
     }
-
-    setIsLoadingReminder(false);
   };
 
   const handleSendTest = async () => {
