@@ -1,12 +1,13 @@
 // Story Finance Service Worker (Offline App Shell & Asset Caching)
 
-const CACHE_NAME = "story-finance-v1";
+const CACHE_NAME = "story-finance-v2";
 const STATIC_ASSETS = [
   "/",
   "/manifest.webmanifest",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
   "/icons/maskable-icon-512x512.png",
+  "/icons/badge-96x96.png",
   "/icons/icon.svg",
 ];
 
@@ -125,7 +126,7 @@ self.addEventListener("push", (event) => {
   const options = {
     body: payload.body || "Jangan lupa mencatat pengeluaranmu hari ini!",
     icon: "/icons/icon-192x192.png",
-    badge: "/icons/icon-192x192.png",
+    badge: "/icons/badge-96x96.png",
     vibrate: [100, 50, 100],
     tag: "daily-reminder",
     renotify: true,
