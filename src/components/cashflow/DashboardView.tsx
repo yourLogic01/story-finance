@@ -136,7 +136,7 @@ export function DashboardView({
           totalExpenses={monthlySummary.totalExpenses}
         />
 
-        {/* Retro Monthly Digest Trigger Button */}
+        {/* Retro Monthly Digest Trigger Button
         <button
           type="button"
           onClick={handleOpenRecap}
@@ -147,7 +147,7 @@ export function DashboardView({
           <span className="text-[10px] text-slate-400 font-sans font-medium flex items-center gap-1">
             {isRecapLoading ? "Memuat..." : "Buka ➔"}
           </span>
-        </button>
+        </button> */}
       </main>
 
       {/* Quick Add Modal */}
