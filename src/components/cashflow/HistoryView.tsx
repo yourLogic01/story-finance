@@ -7,11 +7,7 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { TransactionItem } from "@/components/cashflow/TransactionItem";
 import { EditTransactionModal } from "@/components/cashflow/EditTransactionModal";
 import { QuickAddModal } from "@/components/cashflow/QuickAddModal";
-import {
-  Category,
-  TransactionWithCategory,
-  GamificationProfile,
-} from "@/types";
+import { Category, TransactionWithCategory, GamificationProfile } from "@/types";
 import { deleteTransaction } from "@/app/actions/transactions";
 import { formatDisplayDate, getMonthName } from "@/lib/utils/date";
 import { formatIDR } from "@/lib/utils/currency";
@@ -55,7 +51,9 @@ export function HistoryView({
   const [searchQuery, setSearchQuery] = useState("");
 
   // Modals state
-  const [editingTransaction, setEditingTransaction] = useState<TransactionWithCategory | null>(null);
+  const [editingTransaction, setEditingTransaction] = useState<TransactionWithCategory | null>(
+    null
+  );
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
 
@@ -182,7 +180,6 @@ export function HistoryView({
           <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-100 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="text-[10px] font-medium text-emerald-800">Masuk</span>
             </div>
             <span className="text-xs font-bold text-emerald-700 font-pixel">
               {formatIDR(totalIncome)}
@@ -192,7 +189,6 @@ export function HistoryView({
           <div className="p-2.5 rounded-xl bg-rose-50/70 border border-rose-100 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <TrendingDown className="w-3.5 h-3.5 text-rose-600" />
-              <span className="text-[10px] font-medium text-rose-800">Keluar</span>
             </div>
             <span className="text-xs font-bold text-rose-700 font-pixel">
               {formatIDR(totalExpense)}
@@ -275,9 +271,7 @@ export function HistoryView({
             <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3 text-slate-400">
               <History className="w-6 h-6" />
             </div>
-            <h4 className="text-xs font-bold text-slate-800 mb-1">
-              Tidak Ada Transaksi
-            </h4>
+            <h4 className="text-xs font-bold text-slate-800 mb-1">Tidak Ada Transaksi</h4>
             <p className="text-xs text-slate-500">
               {searchQuery
                 ? "Tidak ada transaksi yang cocok dengan kata kunci."
@@ -288,9 +282,7 @@ export function HistoryView({
           sortedDates.map((dateStr) => {
             const dayTransactions = groupedByDate[dateStr];
             const dailyNet = dayTransactions.reduce((acc, curr) => {
-              return curr.type === "income"
-                ? acc + Number(curr.amount)
-                : acc - Number(curr.amount);
+              return curr.type === "income" ? acc + Number(curr.amount) : acc - Number(curr.amount);
             }, 0);
 
             return (
@@ -300,9 +292,7 @@ export function HistoryView({
               >
                 {/* Date Group Header */}
                 <div className="py-2 px-3.5 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between text-xs">
-                  <span className="font-semibold text-slate-700">
-                    {formatDisplayDate(dateStr)}
-                  </span>
+                  <span className="font-semibold text-slate-700">{formatDisplayDate(dateStr)}</span>
                   <span
                     className={`font-pixel text-[10px] ${
                       dailyNet >= 0 ? "text-emerald-600" : "text-slate-700"
