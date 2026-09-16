@@ -60,7 +60,7 @@ export function RetroMonthlyRecapModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-sm w-[calc(100%-2rem)] p-0 overflow-hidden border-2 border-slate-900 shadow-retro rounded-2xl max-h-[90vh] flex flex-col bg-slate-900 text-white">
         {/* Retro CRT Scanline Top Bar */}
-        <div className="px-4 py-3 bg-slate-950 border-b border-slate-800 flex items-center justify-between shrink-0">
+        <div className="px-4 pr-12 py-3.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between shrink-0">
           <DialogHeader className="p-0 space-y-0 text-left">
             <DialogTitle className="font-pixel text-xs tracking-wider text-emerald-400 uppercase">
               REKAPAN BULANAN
