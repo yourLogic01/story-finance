@@ -33,25 +33,27 @@ export default async function BudgetPage({ searchParams }: BudgetPageProps) {
     ? parseInt(resolvedParams.month, 10)
     : curMonth;
 
-  // 1. Fetch Categories (both default and user custom)
-  const { data: rawCategories } = await supabase
-    .from("categories")
-    .select("*")
-    .order("name", { ascending: true });
+  // Execute all queries in parallel to eliminate waterfall latency
+  const [
+    { data: rawCategories },
+    { budgets, totalIncome },
+    selfRewardAllowance,
+    { data: gamification },
+  ] = await Promise.all([
+    supabase
+      .from("categories")
+      .select("*")
+      .order("name", { ascending: true }),
+    getBudgets(year, month),
+    getSelfRewardAllowance(year, month),
+    supabase
+      .from("gamification_profiles")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+  ]);
 
   const categories = (rawCategories || []) as Category[];
-
-  // 2. Fetch Budgets & Self-Reward Allowance in parallel
-  const [{ budgets, totalIncome }, selfRewardAllowance, { data: gamification }] =
-    await Promise.all([
-      getBudgets(year, month),
-      getSelfRewardAllowance(year, month),
-      supabase
-        .from("gamification_profiles")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle(),
-    ]);
 
   return (
     <BudgetView

@@ -2,7 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    // Allows modern Server Actions & optimizations
+    staleTimes: {
+      dynamic: 60,
+      static: 300,
+    },
   },
 };
 

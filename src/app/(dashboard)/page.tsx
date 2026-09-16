@@ -20,36 +20,35 @@ export default async function DashboardPage() {
   const todayStr = getTodayDateString();
   const { month, year } = getCurrentMonthYear();
 
-  // 1. Fetch Categories
-  const { data: rawCategories } = await supabase
-    .from("categories")
-    .select("*")
-    .order("name", { ascending: true });
-
-  const categories = (rawCategories || []) as Category[];
-
-  // 2. Fetch Today's Transactions
-  const { data: rawTodayTx } = await supabase
-    .from("transactions")
-    .select("*, category:categories(*)")
-    .eq("user_id", user.id)
-    .eq("date", todayStr)
-    .order("created_at", { ascending: false });
-
-  const todayTransactions = (rawTodayTx || []) as TransactionWithCategory[];
-
-  // 3. Fetch Monthly Summary & Self-Reward Allowance
-  const [monthlySummary, selfRewardAllowance] = await Promise.all([
+  // Execute all dashboard queries in parallel to eliminate waterfall latency
+  const [
+    { data: rawCategories },
+    { data: rawTodayTx },
+    monthlySummary,
+    selfRewardAllowance,
+    { data: gamification },
+  ] = await Promise.all([
+    supabase
+      .from("categories")
+      .select("*")
+      .order("name", { ascending: true }),
+    supabase
+      .from("transactions")
+      .select("*, category:categories(*)")
+      .eq("user_id", user.id)
+      .eq("date", todayStr)
+      .order("created_at", { ascending: false }),
     getMonthlySummary(year, month),
     getSelfRewardAllowance(year, month),
+    supabase
+      .from("gamification_profiles")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle(),
   ]);
 
-  // 4. Fetch Gamification Profile
-  const { data: gamification } = await supabase
-    .from("gamification_profiles")
-    .select("*")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const categories = (rawCategories || []) as Category[];
+  const todayTransactions = (rawTodayTx || []) as TransactionWithCategory[];
 
   return (
     <DashboardView

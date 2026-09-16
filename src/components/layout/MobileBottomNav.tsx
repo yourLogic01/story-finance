@@ -53,6 +53,7 @@ export function MobileBottomNav({ onQuickAddClick }: MobileBottomNavProps) {
         {/* 1. Home */}
         <Link
           href={navItems[0].href}
+          prefetch={true}
           className="flex-1 flex flex-col items-center justify-center py-1 group select-none transition-all duration-200 ease-out active:scale-95"
         >
           <div
@@ -89,6 +90,7 @@ export function MobileBottomNav({ onQuickAddClick }: MobileBottomNavProps) {
         {/* 2. Histori */}
         <Link
           href={navItems[1].href}
+          prefetch={true}
           className="flex-1 flex flex-col items-center justify-center py-1 group select-none transition-all duration-200 ease-out active:scale-95"
         >
           <div
@@ -151,6 +153,7 @@ export function MobileBottomNav({ onQuickAddClick }: MobileBottomNavProps) {
         {/* 3. Budget */}
         <Link
           href={navItems[2].href}
+          prefetch={true}
           className="flex-1 flex flex-col items-center justify-center py-1 group select-none transition-all duration-200 ease-out active:scale-95"
         >
           <div
@@ -186,6 +189,7 @@ export function MobileBottomNav({ onQuickAddClick }: MobileBottomNavProps) {
         {/* 4. Profil */}
         <Link
           href={navItems[3].href}
+          prefetch={true}
           className="flex-1 flex flex-col items-center justify-center py-1 group select-none transition-all duration-200 ease-out active:scale-95"
         >
           <div

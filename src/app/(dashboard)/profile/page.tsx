@@ -19,28 +19,29 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  // 1. Fetch user's basic profile
-  const { data: rawProfile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  // 2. Fetch full gamification data
-  const gamification = await getGamificationProfile();
-
-  // 3. Count total lifetime transactions
-  const { count: txCount } = await supabase
-    .from("transactions")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user.id);
-
-  // 4. Fetch categories for QuickAddModal
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("*")
-    .or(`user_id.is.null,user_id.eq.${user.id}`)
-    .order("name", { ascending: true });
+  // Execute all queries in parallel to eliminate waterfall latency
+  const [
+    { data: rawProfile },
+    gamification,
+    { count: txCount },
+    { data: categories },
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle(),
+    getGamificationProfile(),
+    supabase
+      .from("transactions")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("categories")
+      .select("*")
+      .or(`user_id.is.null,user_id.eq.${user.id}`)
+      .order("name", { ascending: true }),
+  ]);
 
   return (
     <ProfileView

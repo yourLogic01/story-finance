@@ -33,27 +33,26 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
     ? parseInt(resolvedParams.month, 10)
     : curMonth;
 
-  // 1. Fetch Categories
-  const { data: rawCategories } = await supabase
-    .from("categories")
-    .select("*")
-    .order("name", { ascending: true });
+  // Execute queries in parallel to eliminate waterfall latency
+  const [{ data: rawCategories }, { data: gamification }, { transactions }] =
+    await Promise.all([
+      supabase
+        .from("categories")
+        .select("*")
+        .order("name", { ascending: true }),
+      supabase
+        .from("gamification_profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      getTransactions({
+        year,
+        month,
+        limit: 150,
+      }),
+    ]);
 
   const categories = (rawCategories || []) as Category[];
-
-  // 2. Fetch Gamification Profile
-  const { data: gamification } = await supabase
-    .from("gamification_profiles")
-    .select("*")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  // 3. Fetch Transactions for the selected month
-  const { transactions } = await getTransactions({
-    year,
-    month,
-    limit: 150,
-  });
 
   return (
     <HistoryView
