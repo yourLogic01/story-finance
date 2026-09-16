@@ -46,7 +46,7 @@ export function WishlistCard({
               isPurchased
                 ? "bg-emerald-950/80 border-emerald-800 text-emerald-400"
                 : isReady
-                ? "bg-amber-950/80 border-amber-500 text-amber-400 animate-pulse"
+                ? "bg-amber-950/80 border-amber-500 text-amber-400"
                 : "bg-slate-800 border-slate-700 text-slate-200"
             )}
           >
@@ -61,12 +61,12 @@ export function WishlistCard({
               {isPurchased ? (
                 <span className="inline-flex items-center gap-1 text-[10px] font-pixel text-emerald-400">
                   <CheckCircle className="w-3 h-3" />
-                  <span>Sudah Didapat</span>
+                  <span>Sudah Dibeli</span>
                 </span>
               ) : isReady ? (
                 <span className="inline-flex items-center gap-1 text-[10px] font-pixel text-amber-400 font-bold">
                   <Sparkles className="w-3 h-3" />
-                  <span>Siap Ditebus!</span>
+                  <span>Target Tercapai</span>
                 </span>
               ) : (
                 <span className="text-[10px] text-slate-400 font-sans">
@@ -128,7 +128,7 @@ export function WishlistCard({
             className="flex-1 py-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 text-xs font-pixel text-slate-200 border border-slate-700 flex items-center justify-center gap-1.5 transition-all"
           >
             <Coins className="w-3.5 h-3.5 text-amber-400" />
-            <span>+ Sisihkan</span>
+            <span>+ Nabung</span>
           </button>
 
           <button
@@ -137,12 +137,12 @@ export function WishlistCard({
             className={cn(
               "flex-1 py-1.5 px-2.5 rounded-lg text-xs font-pixel font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-xs",
               isReady
-                ? "bg-amber-500 hover:bg-amber-400 text-slate-950 animate-bounce"
+                ? "bg-amber-500 hover:bg-amber-400 text-slate-950"
                 : "bg-slate-800/90 hover:bg-slate-700 text-emerald-400 border border-emerald-800/60"
             )}
           >
             <Gift className="w-3.5 h-3.5" />
-            <span>Tebus</span>
+            <span>Tandai Beli</span>
           </button>
         </div>
       ) : (

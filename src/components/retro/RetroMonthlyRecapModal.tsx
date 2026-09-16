@@ -61,17 +61,14 @@ export function RetroMonthlyRecapModal({
       <DialogContent className="max-w-sm w-[calc(100%-2rem)] p-0 overflow-hidden border-2 border-slate-900 shadow-retro rounded-2xl max-h-[90vh] flex flex-col bg-slate-900 text-white">
         {/* Retro CRT Scanline Top Bar */}
         <div className="px-4 py-3 bg-slate-950 border-b border-slate-800 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <DialogHeader className="p-0 space-y-0 text-left">
-              <DialogTitle className="font-pixel text-xs tracking-wider text-emerald-400 uppercase">
-                REKAPAN BULANAN
-              </DialogTitle>
-              <DialogDescription className="text-[10px] text-slate-400">
-                {recapData.monthName}
-              </DialogDescription>
-            </DialogHeader>
-          </div>
+          <DialogHeader className="p-0 space-y-0 text-left">
+            <DialogTitle className="font-pixel text-xs tracking-wider text-emerald-400 uppercase">
+              REKAPAN BULANAN
+            </DialogTitle>
+            <DialogDescription className="text-[10px] text-slate-400">
+              {recapData.monthName}
+            </DialogDescription>
+          </DialogHeader>
 
           {/* Slide Indicator Dots */}
           <div className="flex items-center gap-1.5 bg-slate-900 px-2 py-1 rounded-full border border-slate-800">

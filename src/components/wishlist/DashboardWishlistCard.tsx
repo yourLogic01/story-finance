@@ -38,16 +38,13 @@ export function DashboardWishlistCard({
             <Coins className="w-3.5 h-3.5" />
           </div>
           <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-pixel text-[11px] text-amber-400 uppercase tracking-wider">
-                WISHLIST BAG
-              </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            </div>
+            <span className="font-pixel text-[11px] text-amber-400 uppercase tracking-wider block">
+              WISHLIST
+            </span>
             <span className="text-[10px] text-slate-400 font-sans block -mt-0.5">
               {activeCount > 0
                 ? `${formatIDR(totalSaved)} terkumpul • ${activeCount} barang`
-                : "Belum ada barang impian"}
+                : "Belum ada barang di wishlist"}
             </span>
           </div>
         </div>
@@ -93,7 +90,7 @@ export function DashboardWishlistCard({
       ) : (
         <div className="mt-2 text-xs text-slate-400 flex items-center gap-1.5">
           <Sparkles className="w-3 h-3 text-amber-400" />
-          <span className="text-[11px]">Tap di sini untuk mulai mencatat barang impianmu.</span>
+          <span className="text-[11px]">Catat barang incaranmu di sini.</span>
         </div>
       )}
     </Link>

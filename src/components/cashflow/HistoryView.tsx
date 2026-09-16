@@ -203,11 +203,8 @@ export function HistoryView({
           disabled={isRecapLoading}
           className="w-full p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-pixel text-xs flex items-center justify-between shadow-retro-sm transition-all active:scale-[0.99] border border-slate-800"
         >
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>REKAP & FORECAST BULANAN</span>
-          </div>
-          <span className="text-[10px] text-emerald-400 font-sans font-bold flex items-center gap-1">
+          <span className="text-emerald-400">REKAP & FORECAST BULANAN</span>
+          <span className="text-[10px] text-slate-400 font-sans font-medium flex items-center gap-1">
             {isRecapLoading ? "Memuat..." : "Buka ➔"}
           </span>
         </button>

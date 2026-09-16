@@ -94,10 +94,10 @@ export function AddWishlistModal({
             </div>
             <div>
               <DialogTitle className="font-pixel text-sm text-white">
-                Tambah Barang Impian
+                Tambah ke Wishlist
               </DialogTitle>
               <DialogDescription className="text-xs text-slate-400">
-                Catat barang yang mau kamu capai pelan-pelan.
+                Catat barang yang mau kamu beli nanti.
               </DialogDescription>
             </div>
           </div>
@@ -116,7 +116,7 @@ export function AddWishlistModal({
                 setName(e.target.value);
                 setErrorMsg(null);
               }}
-              placeholder="Contoh: Sepatu Lari, TWS Baru..."
+              placeholder="Misal: Sepatu, Headphone, dll"
               className="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500"
             />
           </div>

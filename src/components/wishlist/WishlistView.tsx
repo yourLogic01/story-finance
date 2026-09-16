@@ -82,23 +82,18 @@ export function WishlistView({
           className="inline-flex items-center gap-1.5 text-xs font-pixel text-slate-400 hover:text-white transition-colors active:scale-95"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Beranda</span>
+          <span>Kembali</span>
         </Link>
-
-        <div className="flex items-center gap-1.5 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800 text-[10px] font-pixel text-emerald-400">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span>INVENTORY RPG</span>
-        </div>
       </div>
 
       {/* Main Title & Quick Action */}
       <div className="flex items-center justify-between">
         <div>
           <span className="text-[10px] font-pixel text-amber-400 uppercase tracking-wider block">
-            Tas Impian
+            Target Belanja
           </span>
           <h1 className="text-xl font-bold font-pixel text-white">
-            Wishlist Bag
+            Wishlist
           </h1>
         </div>
 
@@ -128,7 +123,6 @@ export function WishlistView({
               )}
             </div>
           </div>
-          <span className="text-[10px] font-pixel text-emerald-400">LEVEL UP!</span>
         </div>
       )}
 
@@ -137,7 +131,7 @@ export function WishlistView({
         <div className="flex items-center justify-between text-xs text-slate-400">
           <div className="flex items-center gap-1.5">
             <Coins className="w-4 h-4 text-amber-400" />
-            <span>Total Celengan Aktif</span>
+            <span>Total Tabungan Terkumpul</span>
           </div>
           <span className="font-pixel text-slate-500">
             {initialData.activeCount} Barang
@@ -211,7 +205,7 @@ export function WishlistView({
           )}
         >
           <Trophy className="w-3 h-3 text-amber-400" />
-          <span>Lemari Koleksi</span>
+          <span>Sudah Dibeli</span>
           <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300">
             {completedItems.length}
           </span>
@@ -238,10 +232,10 @@ export function WishlistView({
               </div>
               <div className="space-y-1">
                 <h4 className="text-sm font-bold text-white font-pixel">
-                  Tas Impian Masih Kosong
+                  Belum Ada Barang di Wishlist
                 </h4>
                 <p className="text-xs text-slate-400 max-w-xs mx-auto">
-                  Mulai catat barang yang mau kamu beli biar bisa ditabung pelan-pelan.
+                  Catat barang yang lagi kamu incar biar bisa ditabung bertahap.
                 </p>
               </div>
               <button
@@ -250,7 +244,7 @@ export function WishlistView({
                 className="py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 text-xs font-pixel font-bold inline-flex items-center gap-1.5 transition-all"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Tambah Barang Pertama</span>
+                <span>Tambah Barang</span>
               </button>
             </div>
           )
@@ -270,10 +264,10 @@ export function WishlistView({
               <Trophy className="w-6 h-6" />
             </div>
             <h4 className="text-sm font-bold text-white font-pixel">
-              Belum Ada Barang yang Ditebus
+              Belum Ada Barang yang Dibeli
             </h4>
             <p className="text-xs text-slate-400 max-w-xs mx-auto">
-              Semangat menabung! Barang yang berhasil ditebus nanti akan dipajang di lemari ini.
+              Barang impian yang sudah berhasil kamu beli akan tersimpan di sini.
             </p>
           </div>
         )}

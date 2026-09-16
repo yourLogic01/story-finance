@@ -81,7 +81,7 @@ export function DepositModal({
             </div>
             <div>
               <DialogTitle className="font-pixel text-sm text-white">
-                Sisihkan Tabungan
+                Tambah Tabungan
               </DialogTitle>
               <DialogDescription className="text-xs text-slate-400">
                 Untuk: <span className="text-emerald-400 font-semibold">{item.name}</span>
@@ -129,7 +129,7 @@ export function DepositModal({
           {/* Amount Input */}
           <div className="space-y-1.5">
             <label className="text-[11px] text-slate-400 block">
-              Nominal yang Disisihkan
+              Nominal Tabungan
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-pixel text-slate-400">
@@ -172,7 +172,7 @@ export function DepositModal({
               className="flex-[2] py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 text-xs font-pixel font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all disabled:opacity-50"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>{loading ? "Menyimpan..." : "Tabung (+10 XP)"}</span>
+              <span>{loading ? "Menyimpan..." : "Simpan (+10 XP)"}</span>
             </button>
           </div>
         </form>

@@ -211,9 +211,8 @@ export function LevelTiersModal({
                         {/* Right: Compact Status Badge */}
                         <div className="shrink-0">
                           {isCurrent ? (
-                            <span className="px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[9px] font-pixel font-bold shadow-xs flex items-center gap-0.5">
-                              <span className="w-1 h-1 rounded-full bg-emerald-200 animate-pulse" />
-                              <span>AKTIF</span>
+                            <span className="px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[9px] font-pixel font-bold shadow-xs">
+                              AKTIF
                             </span>
                           ) : isUnlocked ? (
                             <div className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">

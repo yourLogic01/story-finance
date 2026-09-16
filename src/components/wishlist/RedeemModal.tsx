@@ -72,10 +72,10 @@ export function RedeemModal({
             </div>
             <div>
               <DialogTitle className="font-pixel text-sm text-white">
-                Tebus Barang Impian
+                Tandai Sudah Dibeli
               </DialogTitle>
               <DialogDescription className="text-xs text-slate-400">
-                Waktunya menikmati hasil jerih payahmu!
+                Catat sebagai pengeluaran bulan ini.
               </DialogDescription>
             </div>
           </div>
@@ -84,7 +84,7 @@ export function RedeemModal({
         {/* Item Target Card */}
         <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
           <span className="text-[10px] text-slate-400 uppercase font-pixel block">
-            Barang yang Ditebus
+            Barang
           </span>
           <div className="flex items-center justify-between">
             <h4 className="text-sm font-bold text-white truncate">{item.name}</h4>
@@ -116,7 +116,7 @@ export function RedeemModal({
           {/* Note Input */}
           <div className="space-y-1.5">
             <label className="text-[11px] text-slate-400 block">
-              Catatan Transaksi
+              Catatan
             </label>
             <input
               type="text"
@@ -132,7 +132,7 @@ export function RedeemModal({
             <p>
               Pengeluaran sebesar{" "}
               <strong className="text-white">{formatIDR(item.target_amount)}</strong>{" "}
-              akan otomatis dibukukan ke riwayat keuanganmu.
+              akan otomatis masuk ke riwayat transaksi.
             </p>
           </div>
 
@@ -150,7 +150,7 @@ export function RedeemModal({
               disabled={loading}
               className="flex-1 py-2.5 rounded-xl border border-slate-700 hover:bg-slate-800 text-xs font-pixel text-slate-300 transition-all"
             >
-              Nanti Dulu
+              Batal
             </button>
             <button
               type="submit"
@@ -158,7 +158,7 @@ export function RedeemModal({
               className="flex-[2] py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 text-xs font-pixel font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all disabled:opacity-50"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>{loading ? "Memproses..." : "Tebus (+50 XP)"}</span>
+              <span>{loading ? "Memproses..." : "Simpan (+50 XP)"}</span>
             </button>
           </div>
         </form>
