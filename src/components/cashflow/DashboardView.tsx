@@ -18,6 +18,8 @@ import {
 } from "@/types";
 import { Plus } from "lucide-react";
 import { logNoSpendDay, cancelNoSpendDay } from "@/app/actions/no-spend";
+import { getMonthlyRecapData, MonthlyRecapData } from "@/app/actions/recap";
+import { RetroMonthlyRecapModal } from "@/components/retro/RetroMonthlyRecapModal";
 import { getTodayDateString } from "@/lib/utils/date";
 
 interface DashboardViewProps {
@@ -40,6 +42,22 @@ export function DashboardView({
   const router = useRouter();
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isNoSpendLoading, setIsNoSpendLoading] = useState(false);
+
+  // Retro Monthly Recap Modal State
+  const [isRecapOpen, setIsRecapOpen] = useState(false);
+  const [recapData, setRecapData] = useState<MonthlyRecapData | null>(null);
+  const [isRecapLoading, setIsRecapLoading] = useState(false);
+
+  const handleOpenRecap = async () => {
+    setIsRecapLoading(true);
+    try {
+      const data = await getMonthlyRecapData();
+      setRecapData(data);
+      setIsRecapOpen(true);
+    } finally {
+      setIsRecapLoading(false);
+    }
+  };
 
   const handleTransactionSuccess = () => {
     router.refresh();
@@ -77,6 +95,22 @@ export function DashboardView({
         {/* Monthly Summary Card (T029) */}
         <MonthlySummaryCard summary={monthlySummary} />
 
+        {/* Retro Monthly Digest Trigger Button */}
+        <button
+          type="button"
+          onClick={handleOpenRecap}
+          disabled={isRecapLoading}
+          className="w-full p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-pixel text-xs flex items-center justify-between shadow-retro-sm transition-all active:scale-[0.99] border border-slate-800"
+        >
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>REKAP & FORECAST BULAN INI</span>
+          </div>
+          <span className="text-[10px] text-emerald-400 font-sans font-bold flex items-center gap-1">
+            {isRecapLoading ? "Memuat..." : "Buka ➔"}
+          </span>
+        </button>
+
         {/* Guilt-Free Self-Reward Meter (T040) */}
         <SelfRewardMeter allowance={selfRewardAllowance} />
 
@@ -112,6 +146,13 @@ export function DashboardView({
         onClose={() => setIsQuickAddOpen(false)}
         categories={categories}
         onSuccess={handleTransactionSuccess}
+      />
+
+      {/* Retro Monthly Digest Modal */}
+      <RetroMonthlyRecapModal
+        isOpen={isRecapOpen}
+        onClose={() => setIsRecapOpen(false)}
+        recapData={recapData}
       />
 
       {/* Bottom Navigation */}

@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { getMonthlyRecapData, MonthlyRecapData } from "@/app/actions/recap";
+import { RetroMonthlyRecapModal } from "@/components/retro/RetroMonthlyRecapModal";
 
 interface HistoryViewProps {
   categories: Category[];
@@ -59,6 +61,22 @@ export function HistoryView({
   );
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
+
+  // Retro Monthly Recap Modal State
+  const [isRecapOpen, setIsRecapOpen] = useState(false);
+  const [recapData, setRecapData] = useState<MonthlyRecapData | null>(null);
+  const [isRecapLoading, setIsRecapLoading] = useState(false);
+
+  const handleOpenRecap = async () => {
+    setIsRecapLoading(true);
+    try {
+      const data = await getMonthlyRecapData(year, month);
+      setRecapData(data);
+      setIsRecapOpen(true);
+    } finally {
+      setIsRecapLoading(false);
+    }
+  };
 
   // Handle Month Change
   const handlePrevMonth = () => {
@@ -177,6 +195,22 @@ export function HistoryView({
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Retro Monthly Digest Trigger Button */}
+        <button
+          type="button"
+          onClick={handleOpenRecap}
+          disabled={isRecapLoading}
+          className="w-full p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-pixel text-xs flex items-center justify-between shadow-retro-sm transition-all active:scale-[0.99] border border-slate-800"
+        >
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>REKAP & FORECAST BULANAN</span>
+          </div>
+          <span className="text-[10px] text-emerald-400 font-sans font-bold flex items-center gap-1">
+            {isRecapLoading ? "Memuat..." : "Buka ➔"}
+          </span>
+        </button>
 
         {/* Quick Month Filter Stats Pill */}
         <div className="grid grid-cols-2 gap-2">
@@ -362,6 +396,13 @@ export function HistoryView({
             router.refresh();
           });
         }}
+      />
+
+      {/* Retro Monthly Digest Modal */}
+      <RetroMonthlyRecapModal
+        isOpen={isRecapOpen}
+        onClose={() => setIsRecapOpen(false)}
+        recapData={recapData}
       />
 
       {/* Confirm Delete Dialog */}
