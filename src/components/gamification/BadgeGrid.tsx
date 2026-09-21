@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { BadgeWithStatus } from "@/app/actions/gamification";
 import {
   Award,
@@ -17,6 +17,8 @@ import {
   Layers,
   TrendingUp,
   PieChart,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import {
   Dialog,
@@ -47,8 +49,22 @@ interface BadgeGridProps {
 
 export function BadgeGrid({ badges }: BadgeGridProps) {
   const [selectedBadge, setSelectedBadge] = useState<BadgeWithStatus | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const unlockedCount = badges.filter((b) => b.unlocked).length;
+
+  // Prioritize showing unlocked badges first in preview
+  const sortedBadges = useMemo(() => {
+    return [...badges].sort((a, b) => {
+      if (a.unlocked && !b.unlocked) return -1;
+      if (!a.unlocked && b.unlocked) return 1;
+      return 0;
+    });
+  }, [badges]);
+
+  const INITIAL_VISIBLE_COUNT = 4;
+  const hasMore = sortedBadges.length > INITIAL_VISIBLE_COUNT;
+  const visibleBadges = isExpanded ? sortedBadges : sortedBadges.slice(0, INITIAL_VISIBLE_COUNT);
 
   return (
     <div className="space-y-3">
@@ -65,7 +81,7 @@ export function BadgeGrid({ badges }: BadgeGridProps) {
 
       {/* Badges Grid (2-columns on mobile) */}
       <div className="grid grid-cols-2 gap-2.5">
-        {badges.map((badge) => {
+        {visibleBadges.map((badge) => {
           const config = BADGE_ICON_MAP[badge.icon] || {
             icon: Award,
             color: "text-slate-500",
@@ -116,6 +132,27 @@ export function BadgeGrid({ badges }: BadgeGridProps) {
           );
         })}
       </div>
+
+      {/* Collapse / Expand Toggle Button */}
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100/80 active:scale-[0.99] border border-slate-200/70 text-xs font-semibold text-slate-600 flex items-center justify-center gap-1.5 transition-all"
+        >
+          {isExpanded ? (
+            <>
+              <span>Tutup sebagian</span>
+              <ChevronUp className="w-3.5 h-3.5 text-slate-500" />
+            </>
+          ) : (
+            <>
+              <span>Lihat semua ({badges.length} lencana)</span>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+            </>
+          )}
+        </button>
+      )}
 
       {/* Badge Detail Modal */}
       <Dialog open={!!selectedBadge} onOpenChange={(open) => !open && setSelectedBadge(null)}>
