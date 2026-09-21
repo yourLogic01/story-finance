@@ -39,6 +39,15 @@ export interface MonthlyRecapWishlist {
   totalSaved: number;
 }
 
+export interface MonthlyRecapTransactionItem {
+  id: string;
+  date: string;
+  type: "income" | "expense";
+  amount: number;
+  categoryName: string;
+  note: string | null;
+}
+
 export interface MonthlyRecapData {
   month: number;
   year: number;
@@ -93,6 +102,7 @@ export interface MonthlyRecapData {
   budgetBreakdowns: MonthlyRecapBudgetBreakdown[];
   selfReward: MonthlyRecapSelfReward | null;
   wishlist: MonthlyRecapWishlist;
+  transactions: MonthlyRecapTransactionItem[];
 }
 
 export async function getMonthlyRecapData(
@@ -141,10 +151,11 @@ export async function getMonthlyRecapData(
   ] = await Promise.all([
     supabase
       .from("transactions")
-      .select("id, amount, type, date, category:categories(*)")
+      .select("id, amount, type, date, note, category:categories(*)")
       .eq("user_id", user.id)
       .gte("date", startDate)
-      .lte("date", endDate),
+      .lte("date", endDate)
+      .order("date", { ascending: false }),
     supabase
       .from("transactions")
       .select("amount, type")
@@ -500,6 +511,17 @@ export async function getMonthlyRecapData(
     profileRaw?.display_name || user.email?.split("@")[0] || "Pengguna Story Finance";
   const userEmail = user.email || "";
 
+  // 5. Transaction History Items for Statement
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transactionsList: MonthlyRecapTransactionItem[] = currentTransactions.map((tx: any) => ({
+    id: tx.id as string,
+    date: tx.date as string,
+    type: tx.type as "income" | "expense",
+    amount: Number(tx.amount) || 0,
+    categoryName: (tx.category?.name as string) || (tx.type === "income" ? "Pemasukan" : "Pengeluaran"),
+    note: (tx.note as string) || null,
+  }));
+
   return {
     month,
     year,
@@ -539,5 +561,6 @@ export async function getMonthlyRecapData(
     budgetBreakdowns,
     selfReward,
     wishlist: wishlistData,
+    transactions: transactionsList,
   };
 }

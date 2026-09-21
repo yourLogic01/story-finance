@@ -2,6 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { MonthlyRecapData } from "@/app/actions/recap";
 import { formatIDR } from "@/lib/utils/currency";
+import { formatDisplayDate } from "@/lib/utils/date";
 
 export function generateMonthlyPdf(recapData: MonthlyRecapData): void {
   const doc = new jsPDF({
@@ -37,7 +38,7 @@ export function generateMonthlyPdf(recapData: MonthlyRecapData): void {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(148, 163, 184); // slate-400
-  doc.text(`Laporan & Evaluasi Keuangan Bulanan`, margin + 5, yPos + 12);
+  doc.text("Laporan & Evaluasi Keuangan Bulanan", margin + 5, yPos + 12);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(52, 211, 153); // emerald-400
   doc.text(`Periode: ${recapData.monthName}`, margin + 5, yPos + 17);
@@ -107,22 +108,19 @@ export function generateMonthlyPdf(recapData: MonthlyRecapData): void {
   doc.setTextColor(51, 65, 85);
 
   const colWidth = contentWidth / 3;
-  // Habit 1
   doc.text(
     `Konsistensi: ${recapData.totalLoggedDays} dari ${recapData.daysPassed} hari (${recapData.consistencyRate}%)`,
     margin + 4,
     yPos + 5.5
   );
-  // Habit 2
   doc.text(
     `Hari Tanpa Belanja: ${recapData.noSpendDaysCount} hari`,
     margin + colWidth + 4,
     yPos + 5.5
   );
-  // Habit 3
   const topCatText = recapData.topExpenseCategory
     ? `Pos Terbesar: ${recapData.topExpenseCategory.name} (${recapData.topExpenseCategory.percentage}%)`
-    : `Pos Terbesar: -`;
+    : "Pos Terbesar: -";
   doc.text(topCatText, margin + colWidth * 2 + 4, yPos + 5.5);
 
   yPos += 14;
@@ -155,7 +153,7 @@ export function generateMonthlyPdf(recapData: MonthlyRecapData): void {
 
   autoTable(doc, {
     startY: yPos,
-    margin: { left: margin, right: margin },
+    margin: { left: margin, right: margin, bottom: 15 },
     head: [["Pos Kategori", "Batas Anggaran", "Realisasi", "Sisa Anggaran", "% Pakai"]],
     body: budgetRows,
     theme: "grid",
@@ -222,7 +220,7 @@ export function generateMonthlyPdf(recapData: MonthlyRecapData): void {
 
   autoTable(doc, {
     startY: yPos,
-    margin: { left: margin, right: margin },
+    margin: { left: margin, right: margin, bottom: 15 },
     head: [["Batas Alokasi", "Realisasi Terpakai", "Sisa Kuota Aman", "% Pemakaian"]],
     body: selfRewardBody,
     theme: "grid",
@@ -276,7 +274,7 @@ export function generateMonthlyPdf(recapData: MonthlyRecapData): void {
 
   autoTable(doc, {
     startY: yPos,
-    margin: { left: margin, right: margin },
+    margin: { left: margin, right: margin, bottom: 15 },
     head: [["Nama Barang Impian", "Target Harga", "Terkumpul", "Progres"]],
     body: wishlistRows,
     theme: "grid",
@@ -323,7 +321,6 @@ export function generateMonthlyPdf(recapData: MonthlyRecapData): void {
   // -------------------------------------------------------------
   // 6. CATATAN EVALUASI BULANAN
   // -------------------------------------------------------------
-  // Check if we have enough room on page 1 (A4 height is 297mm)
   if (yPos > pageHeight - 35) {
     doc.addPage();
     yPos = 16;
@@ -348,20 +345,94 @@ export function generateMonthlyPdf(recapData: MonthlyRecapData): void {
   const splitAdvice = doc.splitTextToSize(recapData.summaryAdvice, contentWidth - 10);
   doc.text(splitAdvice, margin + 5, yPos + 9);
 
+  yPos += 18;
+
   // -------------------------------------------------------------
-  // 7. FOOTER
+  // 7. RINCIAN RIWAYAT TRANSAKSI LENGKAP (ITEMIZED HISTORY)
   // -------------------------------------------------------------
-  const footerY = pageHeight - 8;
+  // If remaining space on this page is small, start transactions on a new page
+  if (yPos > pageHeight - 45) {
+    doc.addPage();
+    yPos = 16;
+  }
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9.5);
+  doc.setTextColor(15, 23, 42);
+  doc.text("5. RINCIAN RIWAYAT TRANSAKSI BULAN INI", margin, yPos);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
-  doc.setTextColor(148, 163, 184);
-  doc.text("Story Finance — Catatan Keuangan & Petualangan Pribadi", margin, footerY);
-  doc.text(
-    `Halaman 1 dari 1 • Dokumen resmi diunduh pada ${currentDate}`,
-    pageWidth - margin,
-    footerY,
-    { align: "right" }
-  );
+  doc.setFontSize(8);
+  doc.setTextColor(100, 116, 139);
+  doc.text(`(${recapData.transactions.length} Transaksi Dicatat)`, margin + 76, yPos);
+  yPos += 2.5;
+
+  const transactionRows =
+    recapData.transactions && recapData.transactions.length > 0
+      ? recapData.transactions.map((tx) => [
+          formatDisplayDate(tx.date) || tx.date,
+          tx.categoryName,
+          tx.note || "-",
+          tx.type === "income" ? "Pemasukan" : "Pengeluaran",
+          tx.type === "income" ? `+${formatIDR(tx.amount)}` : `-${formatIDR(tx.amount)}`,
+        ])
+      : [["Belum ada transaksi yang dicatat pada periode ini.", "-", "-", "-", "-"]];
+
+  autoTable(doc, {
+    startY: yPos,
+    margin: { left: margin, right: margin, bottom: 15 },
+    head: [["Tanggal", "Kategori", "Catatan / Keterangan", "Tipe", "Nominal"]],
+    body: transactionRows,
+    theme: "striped",
+    headStyles: {
+      fillColor: [15, 23, 42], // slate-900
+      textColor: [255, 255, 255],
+      fontSize: 7.5,
+      fontStyle: "bold",
+      cellPadding: 2,
+    },
+    bodyStyles: {
+      fontSize: 7.5,
+      cellPadding: 2,
+      textColor: [30, 41, 59],
+    },
+    columnStyles: {
+      0: { cellWidth: 32 },
+      1: { cellWidth: 35 },
+      2: { cellWidth: 60 },
+      3: { cellWidth: 22, halign: "center" },
+      4: { cellWidth: 33, halign: "right" },
+    },
+    didParseCell: (data) => {
+      if (data.section === "body" && data.column.index === 4) {
+        const valStr = String(data.cell.raw);
+        if (valStr.startsWith("+")) {
+          data.cell.styles.textColor = [5, 150, 105]; // emerald-600
+        } else if (valStr.startsWith("-")) {
+          data.cell.styles.textColor = [225, 29, 72]; // rose-600
+        }
+        data.cell.styles.fontStyle = "bold";
+      }
+    },
+  });
+
+  // -------------------------------------------------------------
+  // 8. FOOTER HALAMAN (PAGINATION) PADA SETIAP HALAMAN
+  // -------------------------------------------------------------
+  const totalPages = doc.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    const footerY = pageHeight - 7;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(148, 163, 184);
+    doc.text("Story Finance — Catatan Keuangan & Petualangan Pribadi", margin, footerY);
+    doc.text(
+      `Halaman ${i} dari ${totalPages} • Dokumen resmi diunduh pada ${currentDate}`,
+      pageWidth - margin,
+      footerY,
+      { align: "right" }
+    );
+  }
 
   // Directly trigger download in browser!
   const sanitizedMonth = recapData.monthName.toLowerCase().replace(/\s+/g, "-");
