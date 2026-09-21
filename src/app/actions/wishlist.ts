@@ -23,6 +23,18 @@ export interface WishlistActionResult {
   unlockedBadge?: { id: string; title: string; icon: string } | null;
 }
 
+function formatWishlistError(errMessage?: string): string {
+  if (!errMessage) return "Terjadi gangguan sistem.";
+  if (
+    errMessage.includes("wishlist_items") ||
+    errMessage.includes("schema cache") ||
+    errMessage.includes("relation")
+  ) {
+    return "Tabel database Wishlist belum dibuat. Silakan jalankan file migrasi SQL di Supabase SQL Editor.";
+  }
+  return errMessage;
+}
+
 /**
  * Fetch all wishlist items for current user with joined category.
  */
@@ -246,7 +258,7 @@ export async function createWishlistItem(data: {
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: formatWishlistError(error.message) };
     }
 
     revalidatePath("/wishlist");
@@ -257,9 +269,10 @@ export async function createWishlistItem(data: {
       item: inserted as WishlistItem,
     };
   } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Gagal menyimpan barang impian.";
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Gagal menyimpan barang impian.",
+      error: formatWishlistError(msg),
     };
   }
 }
@@ -293,7 +306,10 @@ export async function depositToWishlist(
       .single();
 
     if (fetchErr || !item) {
-      return { success: false, error: "Barang impian tidak ditemukan." };
+      return {
+        success: false,
+        error: fetchErr ? formatWishlistError(fetchErr.message) : "Barang impian tidak ditemukan.",
+      };
     }
 
     const currentSaved = Number(item.saved_amount) || 0;
@@ -313,7 +329,7 @@ export async function depositToWishlist(
       .single();
 
     if (updateErr) {
-      return { success: false, error: updateErr.message };
+      return { success: false, error: formatWishlistError(updateErr.message) };
     }
 
     // Award +10 XP for saving action
@@ -329,9 +345,10 @@ export async function depositToWishlist(
       unlockedBadge,
     };
   } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Gagal menambah tabungan.";
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Gagal menambah tabungan.",
+      error: formatWishlistError(msg),
     };
   }
 }
@@ -363,7 +380,10 @@ export async function purchaseWishlistItem(
       .single();
 
     if (fetchErr || !item) {
-      return { success: false, error: "Barang impian tidak ditemukan." };
+      return {
+        success: false,
+        error: fetchErr ? formatWishlistError(fetchErr.message) : "Barang impian tidak ditemukan.",
+      };
     }
 
     if (item.status === "purchased") {
@@ -423,7 +443,7 @@ export async function purchaseWishlistItem(
       .single();
 
     if (updateErr) {
-      return { success: false, error: updateErr.message };
+      return { success: false, error: formatWishlistError(updateErr.message) };
     }
 
     // 3. Award +50 XP bonus + evaluate wishlist badges
@@ -444,9 +464,10 @@ export async function purchaseWishlistItem(
       unlockedBadge,
     };
   } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Gagal menebus barang impian.";
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Gagal menebus barang impian.",
+      error: formatWishlistError(msg),
     };
   }
 }
@@ -474,7 +495,7 @@ export async function deleteWishlistItem(
       .eq("user_id", user.id);
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: formatWishlistError(error.message) };
     }
 
     revalidatePath("/wishlist");
@@ -482,9 +503,10 @@ export async function deleteWishlistItem(
 
     return { success: true };
   } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Gagal menghapus barang impian.";
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Gagal menghapus barang impian.",
+      error: formatWishlistError(msg),
     };
   }
 }

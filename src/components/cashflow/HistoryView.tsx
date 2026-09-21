@@ -232,15 +232,13 @@ export function HistoryView({
 
         {/* No-Spend Days Achievement Pill */}
         {noSpendDays && noSpendDays.length > 0 && (
-          <div className="p-2.5 px-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 flex items-center justify-between shadow-2xs">
-            <div className="flex items-center gap-2">
+          <div className="py-2 px-3 rounded-xl bg-emerald-50/70 border border-emerald-200/70 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2 text-slate-700 font-medium">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span className="text-xs font-semibold text-emerald-950">
-                Hari Bebas Belanja
-              </span>
+              <span>Hari tanpa belanja</span>
             </div>
-            <span className="text-[10px] font-pixel font-bold text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-200 shadow-2xs">
-              {noSpendDays.length} Hari Bebas Belanja 🛡️
+            <span className="font-pixel font-semibold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-lg text-xs">
+              {noSpendDays.length} hari
             </span>
           </div>
         )}

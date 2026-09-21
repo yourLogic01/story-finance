@@ -18,9 +18,7 @@ import {
 } from "@/types";
 import { Plus } from "lucide-react";
 import { logNoSpendDay, cancelNoSpendDay } from "@/app/actions/no-spend";
-import { getMonthlyRecapData, MonthlyRecapData } from "@/app/actions/recap";
 import { WishlistSummaryData } from "@/app/actions/wishlist";
-import { RetroMonthlyRecapModal } from "@/components/retro/RetroMonthlyRecapModal";
 import { DashboardWishlistCard } from "@/components/wishlist/DashboardWishlistCard";
 import { getTodayDateString } from "@/lib/utils/date";
 
@@ -46,22 +44,6 @@ export function DashboardView({
   const router = useRouter();
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isNoSpendLoading, setIsNoSpendLoading] = useState(false);
-
-  // Retro Monthly Recap Modal State
-  const [isRecapOpen, setIsRecapOpen] = useState(false);
-  const [recapData, setRecapData] = useState<MonthlyRecapData | null>(null);
-  const [isRecapLoading, setIsRecapLoading] = useState(false);
-
-  const handleOpenRecap = async () => {
-    setIsRecapLoading(true);
-    try {
-      const data = await getMonthlyRecapData();
-      setRecapData(data);
-      setIsRecapOpen(true);
-    } finally {
-      setIsRecapLoading(false);
-    }
-  };
 
   const handleTransactionSuccess = () => {
     router.refresh();
@@ -135,19 +117,6 @@ export function DashboardView({
           breakdowns={monthlySummary.categoryBreakdowns}
           totalExpenses={monthlySummary.totalExpenses}
         />
-
-        {/* Retro Monthly Digest Trigger Button
-        <button
-          type="button"
-          onClick={handleOpenRecap}
-          disabled={isRecapLoading}
-          className="w-full p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-pixel text-xs flex items-center justify-between shadow-retro-sm transition-all active:scale-[0.99] border border-slate-800"
-        >
-          <span className="text-emerald-400">REKAP & FORECAST BULAN INI</span>
-          <span className="text-[10px] text-slate-400 font-sans font-medium flex items-center gap-1">
-            {isRecapLoading ? "Memuat..." : "Buka ➔"}
-          </span>
-        </button> */}
       </main>
 
       {/* Quick Add Modal */}
@@ -156,13 +125,6 @@ export function DashboardView({
         onClose={() => setIsQuickAddOpen(false)}
         categories={categories}
         onSuccess={handleTransactionSuccess}
-      />
-
-      {/* Retro Monthly Digest Modal */}
-      <RetroMonthlyRecapModal
-        isOpen={isRecapOpen}
-        onClose={() => setIsRecapOpen(false)}
-        recapData={recapData}
       />
 
       {/* Bottom Navigation */}
