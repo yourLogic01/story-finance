@@ -127,3 +127,35 @@ body[data-scroll-locked] {
   overflow: visible !important;
   --removed-body-scroll-bar-size: 0px !important;
 }
+
+/* Print styles for Monthly Financial Statement Export */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  #printable-monthly-report,
+  #printable-monthly-report * {
+    visibility: visible !important;
+  }
+  #printable-monthly-report {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    z-index: 99999 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

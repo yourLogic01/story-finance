@@ -8,6 +8,37 @@ import {
 } from "@/lib/utils/date";
 import { Category } from "@/types";
 
+export interface MonthlyRecapBudgetBreakdown {
+  categoryId: string | null;
+  categoryName: string;
+  targetAmount: number;
+  spentAmount: number;
+  remainingAmount: number;
+  percentageUsed: number;
+}
+
+export interface MonthlyRecapSelfReward {
+  configured: boolean;
+  limit: number;
+  spent: number;
+  remaining: number;
+  percentageUsed: number;
+}
+
+export interface MonthlyRecapWishlist {
+  activeItems: Array<{
+    name: string;
+    targetAmount: number;
+    savedAmount: number;
+    percentage: number;
+  }>;
+  purchasedItemsThisMonth: Array<{
+    name: string;
+    amount: number;
+  }>;
+  totalSaved: number;
+}
+
 export interface MonthlyRecapData {
   month: number;
   year: number;
@@ -55,6 +86,13 @@ export interface MonthlyRecapData {
   budgetStatus: "safe" | "warning" | "danger" | "no_budget";
   projectedDifference: number;
   summaryAdvice: string;
+
+  // Extended Data for PDF Report
+  userDisplayName: string;
+  userEmail: string;
+  budgetBreakdowns: MonthlyRecapBudgetBreakdown[];
+  selfReward: MonthlyRecapSelfReward | null;
+  wishlist: MonthlyRecapWishlist;
 }
 
 export async function getMonthlyRecapData(
@@ -92,12 +130,14 @@ export async function getMonthlyRecapData(
     prevMonth
   );
 
-  // Parallel fetch: current tx, prev tx, no spend days, budgets
+  // Parallel fetch: current tx, prev tx, no spend days, budgets, wishlist, profile
   const [
     { data: currentTxRaw },
     { data: prevTxRaw },
     { data: noSpendRaw },
     { data: budgetsRaw },
+    wishlistResult,
+    { data: profileRaw },
   ] = await Promise.all([
     supabase
       .from("transactions")
@@ -119,16 +159,31 @@ export async function getMonthlyRecapData(
       .lte("date", endDate),
     supabase
       .from("budgets")
-      .select("target_value, category_id, calculation_mode")
+      .select("target_value, category_id, calculation_mode, category:categories(id, name, icon)")
       .eq("user_id", user.id)
       .eq("year", year)
       .eq("month", month),
+    supabase
+      .from("wishlist_items")
+      .select("name, target_amount, saved_amount, status, purchased_at")
+      .eq("user_id", user.id),
+    supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", user.id)
+      .maybeSingle(),
   ]);
 
   const currentTransactions = currentTxRaw || [];
   const prevTransactions = prevTxRaw || [];
   const noSpendDays = noSpendRaw || [];
-  const budgets = budgetsRaw || [];
+  interface RecapBudgetRow {
+    target_value: number;
+    category_id: string | null;
+    calculation_mode: string;
+    category?: { id: string; name: string; icon: string } | null;
+  }
+  const budgets: RecapBudgetRow[] = (budgetsRaw || []) as unknown as RecapBudgetRow[];
 
   // Calculate current month cashflow
   let totalIncome = 0;
@@ -335,6 +390,116 @@ export async function getMonthlyRecapData(
     }
   }
 
+  // 1. Calculate Budget Breakdowns for Report
+  const budgetBreakdowns: MonthlyRecapBudgetBreakdown[] = [];
+  for (const b of budgets) {
+    const targetVal = Number(b.target_value) || 0;
+    const mode = b.calculation_mode as "fixed" | "percentage";
+    const effectiveLimit =
+      mode === "percentage" ? (targetVal / 100) * totalIncome : targetVal;
+
+    let spent = 0;
+    let catName = b.category?.name || "Anggaran Umum";
+
+    if (b.category_id) {
+      spent = expenseByCategory.get(b.category_id)?.amount || 0;
+    } else {
+      spent = totalExpenses;
+      catName = "Batas Total Pengeluaran";
+    }
+
+    const remaining = Math.max(0, effectiveLimit - spent);
+    const percentageUsed =
+      effectiveLimit > 0 ? Math.round((spent / effectiveLimit) * 100) : 0;
+
+    budgetBreakdowns.push({
+      categoryId: b.category_id,
+      categoryName: catName,
+      targetAmount: effectiveLimit,
+      spentAmount: spent,
+      remainingAmount: remaining,
+      percentageUsed,
+    });
+  }
+
+  // 2. Self-Reward Meter
+  let selfReward: MonthlyRecapSelfReward | null = null;
+  const srBudget = budgets.find((b) => b.category?.name?.toLowerCase().includes("self-reward"));
+  if (srBudget) {
+    const targetVal = Number(srBudget.target_value) || 0;
+    const limit =
+      srBudget.calculation_mode === "percentage"
+        ? (targetVal / 100) * totalIncome
+        : targetVal;
+    const spent = srBudget.category_id
+      ? expenseByCategory.get(srBudget.category_id)?.amount || 0
+      : 0;
+    selfReward = {
+      configured: true,
+      limit,
+      spent,
+      remaining: Math.max(0, limit - spent),
+      percentageUsed: limit > 0 ? Math.round((spent / limit) * 100) : 0,
+    };
+  } else {
+    const srCategoryEntry = Array.from(expenseByCategory.values()).find((e) =>
+      e.category.name.toLowerCase().includes("self-reward")
+    );
+    if (srCategoryEntry) {
+      selfReward = {
+        configured: false,
+        limit: 0,
+        spent: srCategoryEntry.amount,
+        remaining: 0,
+        percentageUsed: 0,
+      };
+    }
+  }
+
+  // 3. Wishlist Bag
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawWishlist: any[] = wishlistResult?.data || [];
+  const activeWishlistItems = rawWishlist
+    .filter((item) => item.status !== "purchased")
+    .map((item) => {
+      const target = Number(item.target_amount) || 0;
+      const saved = Number(item.saved_amount) || 0;
+      return {
+        name: item.name as string,
+        targetAmount: target,
+        savedAmount: saved,
+        percentage: target > 0 ? Math.min(100, Math.round((saved / target) * 100)) : 0,
+      };
+    });
+
+  const purchasedThisMonth = rawWishlist
+    .filter((item) => {
+      if (item.status !== "purchased") return false;
+      if (!item.purchased_at) return false;
+      const pDate = (item.purchased_at as string).slice(0, 10);
+      return pDate >= startDate && pDate <= endDate;
+    })
+    .map((item) => ({
+      name: item.name as string,
+      amount: Number(item.target_amount) || Number(item.saved_amount) || 0,
+    }));
+
+  const totalWishlistSaved = activeWishlistItems.reduce(
+    (acc, curr) => acc + curr.savedAmount,
+    0
+  );
+
+  const wishlistData: MonthlyRecapWishlist = {
+    activeItems: activeWishlistItems,
+    purchasedItemsThisMonth: purchasedThisMonth,
+    totalSaved: totalWishlistSaved,
+  };
+
+  // 4. User Profile
+  const userDisplayName =
+    profileRaw?.display_name || user.email?.split("@")[0] || "Pengguna Story Finance";
+  const userEmail = user.email || "";
+
   return {
     month,
     year,
@@ -368,5 +533,11 @@ export async function getMonthlyRecapData(
     budgetStatus,
     projectedDifference,
     summaryAdvice,
+
+    userDisplayName,
+    userEmail,
+    budgetBreakdowns,
+    selfReward,
+    wishlist: wishlistData,
   };
 }
