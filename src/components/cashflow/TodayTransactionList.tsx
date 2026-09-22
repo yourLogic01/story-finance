@@ -32,7 +32,7 @@ export function TodayTransactionList({
           <ReceiptText className="w-3.5 h-3.5 text-emerald-600" />
           <span>Pengeluaran Hari Ini</span>
         </CardTitle>
-        <span className="text-xs font-bold text-slate-900 font-pixel">
+        <span className="text-xs font-bold text-slate-900 font-pixel privacy-mask">
           {isNoSpendToday && totalExpenseToday === 0
             ? "Rp 0 (Bebas Belanja)"
             : formatIDR(totalExpenseToday)}
@@ -130,7 +130,7 @@ export function TodayTransactionList({
 
                 <div className="text-right">
                   <span
-                    className={`text-xs font-bold block ${
+                    className={`text-xs font-bold block privacy-mask ${
                       isExpense ? "text-rose-600" : "text-emerald-600"
                     }`}
                   >

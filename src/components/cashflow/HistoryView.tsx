@@ -215,7 +215,7 @@ export function HistoryView({
             <div className="flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
             </div>
-            <span className="text-xs font-bold text-emerald-700 font-pixel">
+            <span className="text-xs font-bold text-emerald-700 font-pixel privacy-mask">
               {formatIDR(totalIncome)}
             </span>
           </div>
@@ -224,7 +224,7 @@ export function HistoryView({
             <div className="flex items-center gap-1.5">
               <TrendingDown className="w-3.5 h-3.5 text-rose-600" />
             </div>
-            <span className="text-xs font-bold text-rose-700 font-pixel">
+            <span className="text-xs font-bold text-rose-700 font-pixel privacy-mask">
               {formatIDR(totalExpense)}
             </span>
           </div>
@@ -341,7 +341,7 @@ export function HistoryView({
                 <div className="py-2 px-3.5 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between text-xs">
                   <span className="font-semibold text-slate-700">{formatDisplayDate(dateStr)}</span>
                   <span
-                    className={`font-pixel text-[10px] ${
+                    className={`font-pixel text-[10px] privacy-mask ${
                       dailyNet >= 0 ? "text-emerald-600" : "text-slate-700"
                     }`}
                   >

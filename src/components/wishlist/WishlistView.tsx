@@ -13,8 +13,9 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { QuickAddModal } from "@/components/cashflow/QuickAddModal";
 import { formatIDR } from "@/lib/utils/currency";
-import { ArrowLeft, Plus, Sparkles, Trophy, Coins, PackageOpen } from "lucide-react";
+import { ArrowLeft, Plus, Sparkles, Trophy, Coins, PackageOpen, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { usePrivacy } from "@/context/PrivacyContext";
 
 interface WishlistViewProps {
   initialData: WishlistSummaryData;
@@ -23,6 +24,7 @@ interface WishlistViewProps {
 
 export function WishlistView({ initialData, categories }: WishlistViewProps) {
   const router = useRouter();
+  const { isPrivacyMode, togglePrivacyMode } = usePrivacy();
   const [activeTab, setActiveTab] = useState<"active" | "completed">("active");
 
   // Modals state
@@ -80,14 +82,34 @@ export function WishlistView({ initialData, categories }: WishlistViewProps) {
 
         <span className="font-pixel text-xs text-slate-200 uppercase tracking-wider">Wishlist</span>
 
-        <button
-          type="button"
-          onClick={() => setIsAddOpen(true)}
-          className="py-1.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 text-xs font-pixel font-bold flex items-center gap-1 shadow-xs transition-all"
-        >
-          <Plus className="w-3.5 h-3.5 stroke-[3]" />
-          <span>Tambah</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={togglePrivacyMode}
+            title={isPrivacyMode ? "Tampilkan nominal uang" : "Sembunyikan nominal uang (Mode Privasi)"}
+            aria-label={isPrivacyMode ? "Tampilkan nominal uang" : "Sembunyikan nominal uang"}
+            className={`w-7 h-7 rounded-lg border flex items-center justify-center transition-all active:scale-95 ${
+              isPrivacyMode
+                ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-400"
+                : "bg-slate-900 border-slate-700/80 text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            {isPrivacyMode ? (
+              <EyeOff className="w-3.5 h-3.5 stroke-[2.5]" />
+            ) : (
+              <Eye className="w-3.5 h-3.5" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsAddOpen(true)}
+            className="py-1.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 text-xs font-pixel font-bold flex items-center gap-1 shadow-xs transition-all"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[3]" />
+            <span>Tambah</span>
+          </button>
+        </div>
       </header>
 
       {/* Main Content Body */}
@@ -131,10 +153,10 @@ export function WishlistView({ initialData, categories }: WishlistViewProps) {
 
           <div className="flex items-baseline justify-between">
             <span className="text-xl font-bold font-pixel text-emerald-400">
-              {formatIDR(initialData.totalSaved)}
+              <span className="privacy-mask">{formatIDR(initialData.totalSaved)}</span>
             </span>
             <span className="text-xs text-slate-400">
-              dari {formatIDR(initialData.totalTarget)}
+              dari <span className="privacy-mask">{formatIDR(initialData.totalTarget)}</span>
             </span>
           </div>
 

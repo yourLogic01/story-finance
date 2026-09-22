@@ -39,30 +39,15 @@ export function MonthlySummaryCard({ summary }: MonthlySummaryCardProps) {
 
       {/* Top Header */}
       <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] font-medium text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-            <Wallet className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Saldo {monthName} {summary.year}</span>
+        <span className="text-[11px] font-medium text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+          <Wallet className="w-3.5 h-3.5 text-emerald-400" />
+          <span>
+            Saldo {monthName} {summary.year}
           </span>
-          <button
-            type="button"
-            onClick={togglePrivacyMode}
-            title={isPrivacyMode ? "Tampilkan nominal" : "Sembunyikan nominal (Mode Privasi)"}
-            aria-label={isPrivacyMode ? "Tampilkan nominal" : "Sembunyikan nominal"}
-            className="p-1 rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition-colors active:scale-95"
-          >
-            {isPrivacyMode ? (
-              <EyeOff className="w-3.5 h-3.5 text-emerald-400" />
-            ) : (
-              <Eye className="w-3.5 h-3.5" />
-            )}
-          </button>
-        </div>
+        </span>
         <div className="flex items-center gap-1.5">
           <RetroMoodAvatar mood={summary.financialMood} size="sm" />
-          <span
-            className={`text-[9px] font-pixel px-2 py-0.5 rounded border ${moodConfig.color}`}
-          >
+          <span className={`text-[9px] font-pixel px-2 py-0.5 rounded border ${moodConfig.color}`}>
             {moodConfig.label}
           </span>
         </div>
@@ -70,17 +55,28 @@ export function MonthlySummaryCard({ summary }: MonthlySummaryCardProps) {
 
       {/* Big Net Balance */}
       <div className="my-3">
-        <h3
-          className={`text-2xl font-bold font-pixel tracking-tight ${
-            isPrivacyMode
-              ? "text-slate-200"
-              : isSurplus
-              ? "text-emerald-400"
-              : "text-rose-400"
-          }`}
-        >
-          {isPrivacyMode ? "Rp ******" : formatIDR(summary.netBalance)}
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3
+            className={`text-2xl font-bold font-pixel tracking-tight ${
+              isPrivacyMode ? "text-slate-200" : isSurplus ? "text-emerald-400" : "text-rose-400"
+            }`}
+          >
+            {isPrivacyMode ? "Rp ******" : formatIDR(summary.netBalance)}
+          </h3>
+          <button
+            type="button"
+            onClick={togglePrivacyMode}
+            title={isPrivacyMode ? "Tampilkan nominal" : "Sembunyikan nominal (Mode Privasi)"}
+            aria-label={isPrivacyMode ? "Tampilkan nominal" : "Sembunyikan nominal"}
+            className="p-1 rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition-colors active:scale-90"
+          >
+            {isPrivacyMode ? (
+              <EyeOff className="w-4 h-4 text-emerald-400" />
+            ) : (
+              <Eye className="w-4 h-4 text-slate-400 hover:text-slate-200" />
+            )}
+          </button>
+        </div>
         <span className="text-[10px] text-slate-400 block mt-0.5">
           {summary.transactionCount} transaksi tercatat bulan ini
         </span>
