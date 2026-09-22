@@ -58,7 +58,7 @@ export function MonthlySummaryCard({ summary }: MonthlySummaryCardProps) {
             isSurplus ? "text-emerald-400" : "text-rose-400"
           }`}
         >
-          {formatIDR(summary.netBalance)}
+          <span className="privacy-mask">{formatIDR(summary.netBalance)}</span>
         </h3>
         <span className="text-[10px] text-slate-400 block mt-0.5">
           {summary.transactionCount} transaksi tercatat bulan ini
@@ -73,7 +73,7 @@ export function MonthlySummaryCard({ summary }: MonthlySummaryCardProps) {
           </div>
           <div>
             <span className="text-[10px] text-slate-400 block leading-tight">Pemasukan</span>
-            <span className="text-xs font-bold text-slate-100 leading-tight">
+            <span className="text-xs font-bold text-slate-100 leading-tight privacy-mask">
               {formatIDR(summary.totalIncome)}
             </span>
           </div>
@@ -85,7 +85,7 @@ export function MonthlySummaryCard({ summary }: MonthlySummaryCardProps) {
           </div>
           <div>
             <span className="text-[10px] text-slate-400 block leading-tight">Pengeluaran</span>
-            <span className="text-xs font-bold text-slate-100 leading-tight">
+            <span className="text-xs font-bold text-slate-100 leading-tight privacy-mask">
               {formatIDR(summary.totalExpenses)}
             </span>
           </div>

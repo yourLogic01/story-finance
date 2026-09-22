@@ -127,3 +127,17 @@ body[data-scroll-locked] {
   overflow: visible !important;
   --removed-body-scroll-bar-size: 0px !important;
 }
+
+/* Privacy Mode Masking */
+.privacy-mask {
+  transition: filter 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-block;
+}
+
+[data-privacy="true"] .privacy-mask {
+  filter: blur(6.5px);
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
+}
+

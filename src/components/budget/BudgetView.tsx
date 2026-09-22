@@ -186,7 +186,7 @@ export function BudgetView({
               Anggaran {getMonthName(month)} {year}
             </h2>
             <span className="text-[10px] text-slate-400 font-medium">
-              Pemasukan: {formatIDR(totalIncome)}
+              Pemasukan: <span className="privacy-mask">{formatIDR(totalIncome)}</span>
             </span>
           </div>
 
@@ -236,7 +236,7 @@ export function BudgetView({
                         : "text-slate-900"
                     }`}
                   >
-                    {formatIDR(selfRewardAllowance.remainingAllowance)}
+                    <span className="privacy-mask">{formatIDR(selfRewardAllowance.remainingAllowance)}</span>
                   </h3>
                 </div>
                 <span className="text-xs font-semibold text-slate-500">
@@ -258,8 +258,8 @@ export function BudgetView({
               </div>
 
               <div className="flex items-center justify-between text-[11px] text-slate-500">
-                <span>Terpakai: {formatIDR(selfRewardAllowance.totalSpent)}</span>
-                <span>Batas: {formatIDR(selfRewardAllowance.effectiveLimit)}</span>
+                <span>Terpakai: <span className="privacy-mask">{formatIDR(selfRewardAllowance.totalSpent)}</span></span>
+                <span>Batas: <span className="privacy-mask">{formatIDR(selfRewardAllowance.effectiveLimit)}</span></span>
               </div>
             </div>
           ) : (

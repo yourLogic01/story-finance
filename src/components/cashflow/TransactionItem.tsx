@@ -66,7 +66,7 @@ export function TransactionItem({
       {/* Right: Nominal & Action Buttons */}
       <div className="flex items-center gap-2 shrink-0">
         <span
-          className={`text-xs font-bold font-pixel tracking-tight ${
+          className={`text-xs font-bold font-pixel tracking-tight privacy-mask ${
             isExpense ? "text-slate-900" : "text-emerald-600"
           }`}
         >

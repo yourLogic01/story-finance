@@ -22,7 +22,7 @@ export function CategoryBreakdown({
           <PieChart className="w-3.5 h-3.5 text-emerald-600" />
           <span>Pengeluaran per Kategori</span>
         </CardTitle>
-        <span className="text-xs font-bold text-slate-900 font-pixel">
+        <span className="text-xs font-bold text-slate-900 font-pixel privacy-mask">
           {formatIDR(totalExpenses)}
         </span>
       </CardHeader>
@@ -55,7 +55,7 @@ export function CategoryBreakdown({
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-900">
+                    <span className="font-bold text-slate-900 privacy-mask">
                       {formatIDR(item.totalAmount)}
                     </span>
                     <span className="text-[10px] font-pixel text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import { ServiceWorkerRegister } from "@/components/layout/ServiceWorkerRegister";
 import { OfflineBanner } from "@/components/layout/OfflineBanner";
+import { PrivacyProvider } from "@/context/PrivacyContext";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -50,7 +51,7 @@ export default function RootLayout({
         <ServiceWorkerRegister />
         <OfflineBanner />
         <div className="mx-auto max-w-md min-h-screen flex flex-col bg-white shadow-xl relative">
-          {children}
+          <PrivacyProvider>{children}</PrivacyProvider>
         </div>
       </body>
     </html>

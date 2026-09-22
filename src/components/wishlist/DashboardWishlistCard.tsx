@@ -43,9 +43,13 @@ export function DashboardWishlistCard({
               WISHLIST
             </span>
             <span className="text-[10px] text-slate-400 font-sans block -mt-0.5">
-              {activeCount > 0
-                ? `${formatIDR(totalSaved)} terkumpul • ${activeCount} barang`
-                : "Belum ada barang di wishlist"}
+              {activeCount > 0 ? (
+                <>
+                  <span className="privacy-mask">{formatIDR(totalSaved)}</span> terkumpul • {activeCount} barang
+                </>
+              ) : (
+                "Belum ada barang di wishlist"
+              )}
             </span>
           </div>
         </div>
@@ -84,8 +88,8 @@ export function DashboardWishlistCard({
           </div>
 
           <div className="flex items-center justify-between text-[9px] text-slate-500 font-pixel">
-            <span>{formatIDR(topItem.saved_amount)}</span>
-            <span>Target: {formatIDR(topItem.target_amount)}</span>
+            <span className="privacy-mask">{formatIDR(topItem.saved_amount)}</span>
+            <span>Target: <span className="privacy-mask">{formatIDR(topItem.target_amount)}</span></span>
           </div>
         </div>
       ) : (

@@ -248,7 +248,7 @@ export function RetroMonthlyRecapModal({
                       <span className="text-[10px] text-slate-400 block leading-tight">
                         Total Pemasukan
                       </span>
-                      <span className="text-xs font-bold text-emerald-400 font-pixel">
+                      <span className="text-xs font-bold text-emerald-400 font-pixel privacy-mask">
                         {formatIDR(recapData.totalIncome)}
                       </span>
                     </div>
@@ -279,7 +279,7 @@ export function RetroMonthlyRecapModal({
                       <span className="text-[10px] text-slate-400 block leading-tight">
                         Total Pengeluaran
                       </span>
-                      <span className="text-xs font-bold text-rose-400 font-pixel">
+                      <span className="text-xs font-bold text-rose-400 font-pixel privacy-mask">
                         {formatIDR(recapData.totalExpenses)}
                       </span>
                     </div>
@@ -313,7 +313,7 @@ export function RetroMonthlyRecapModal({
                     {recapData.savingsRate}%
                   </span>
                   <span className="text-[9px] text-slate-400 block leading-tight">
-                    Sisa: {formatIDR(recapData.netSavings)}
+                    Sisa: <span className="privacy-mask">{formatIDR(recapData.netSavings)}</span>
                   </span>
                 </div>
 
@@ -326,7 +326,7 @@ export function RetroMonthlyRecapModal({
                       {recapData.topExpenseCategory.name}
                     </span>
                     <span className="text-[10px] font-pixel text-rose-400 block leading-tight">
-                      {formatIDR(recapData.topExpenseCategory.amount)} ({recapData.topExpenseCategory.percentage}%)
+                      <span className="privacy-mask">{formatIDR(recapData.topExpenseCategory.amount)}</span> ({recapData.topExpenseCategory.percentage}%)
                     </span>
                   </div>
                 ) : (
@@ -361,7 +361,7 @@ export function RetroMonthlyRecapModal({
                     Rata-rata Harian
                   </span>
                   <span className="text-xs font-bold font-pixel text-amber-400">
-                    {formatIDR(recapData.dailyBurnRate)} / hari
+                    <span className="privacy-mask">{formatIDR(recapData.dailyBurnRate)}</span> / hari
                   </span>
                 </div>
 
@@ -372,7 +372,7 @@ export function RetroMonthlyRecapModal({
                         ? "Estimasi Pengeluaran Akhir Bulan"
                         : "Total Akhir Bulan"}
                     </span>
-                    <span className="text-sm font-bold font-pixel text-white block mt-0.5">
+                    <span className="text-sm font-bold font-pixel text-white block mt-0.5 privacy-mask">
                       {formatIDR(recapData.projectedExpense)}
                     </span>
                   </div>
