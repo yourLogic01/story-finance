@@ -53,7 +53,7 @@ export function MonthlySummaryCard({ summary }: MonthlySummaryCardProps) {
         </div>
       </div>
 
-      {/* Big Net Balance */}
+      {/* Big Net Balance with Eye Toggle Button */}
       <div className="my-3">
         <div className="flex items-center gap-2">
           <h3
