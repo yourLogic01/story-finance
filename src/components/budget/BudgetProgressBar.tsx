@@ -104,13 +104,15 @@ export function BudgetProgressBar({ budget, onEdit, onDelete }: BudgetProgressBa
       {/* Financial Details */}
       <div className="flex items-center justify-between text-xs pt-0.5">
         <span className="text-slate-500 text-[11px]">
-          Terpakai: <strong>{formatIDR(budget.spent)}</strong> / {formatIDR(budget.effective_limit)}
+          Terpakai: <strong className="privacy-mask">{formatIDR(budget.spent)}</strong> / <span className="privacy-mask">{formatIDR(budget.effective_limit)}</span>
         </span>
 
         <span className={`text-[11px] font-bold ${textColor}`}>
-          {isOver
-            ? `Over: ${formatIDR(budget.spent - budget.effective_limit)}`
-            : `Sisa: ${formatIDR(budget.remaining)}`}
+          {isOver ? (
+            <>Over: <span className="privacy-mask">{formatIDR(budget.spent - budget.effective_limit)}</span></>
+          ) : (
+            <>Sisa: <span className="privacy-mask">{formatIDR(budget.remaining)}</span></>
+          )}
         </span>
       </div>
     </div>

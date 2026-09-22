@@ -70,7 +70,7 @@ export function WishlistCard({
                 </span>
               ) : (
                 <span className="text-[10px] text-slate-400 font-sans">
-                  Target: {formatIDR(item.target_amount)}
+                  Target: <span className="privacy-mask">{formatIDR(item.target_amount)}</span>
                 </span>
               )}
             </div>
@@ -91,7 +91,7 @@ export function WishlistCard({
       {!isPurchased && (
         <div className="mt-3 space-y-1.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-[11px] font-pixel text-slate-400">
+            <span className="text-[11px] font-pixel text-slate-400 privacy-mask">
               {formatIDR(item.saved_amount)}
             </span>
             <span
@@ -148,7 +148,7 @@ export function WishlistCard({
       ) : (
         <div className="mt-2.5 pt-2 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400">
           <span>Nilai Barang:</span>
-          <span className="font-pixel text-slate-300">
+          <span className="font-pixel text-slate-300 privacy-mask">
             {formatIDR(item.target_amount)}
           </span>
         </div>

@@ -98,7 +98,7 @@ export function SelfRewardMeter({ allowance }: SelfRewardMeterProps) {
             isOver ? "text-rose-600" : isWarning ? "text-amber-600" : "text-slate-900"
           }`}
         >
-          {formatIDR(allowance.remainingAllowance)}
+          <span className="privacy-mask">{formatIDR(allowance.remainingAllowance)}</span>
         </h3>
       </div>
 
@@ -113,10 +113,10 @@ export function SelfRewardMeter({ allowance }: SelfRewardMeterProps) {
 
         <div className="flex items-center justify-between text-[11px] text-slate-500">
           <span>
-            Terpakai: <strong>{formatIDR(allowance.totalSpent)}</strong>
+            Terpakai: <strong className="privacy-mask">{formatIDR(allowance.totalSpent)}</strong>
           </span>
           <span>
-            Batas: <strong>{formatIDR(allowance.effectiveLimit)}</strong> (
+            Batas: <strong className="privacy-mask">{formatIDR(allowance.effectiveLimit)}</strong> (
             {allowance.percentageUsed}%)
           </span>
         </div>
