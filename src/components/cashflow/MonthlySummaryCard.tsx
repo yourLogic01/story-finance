@@ -1,16 +1,18 @@
 "use client";
 
-import { Wallet, TrendingUp, TrendingDown } from "lucide-react";
+import { Wallet, TrendingUp, TrendingDown, Eye, EyeOff } from "lucide-react";
 import { formatIDR } from "@/lib/utils/currency";
 import { getMonthName } from "@/lib/utils/date";
 import { MonthlySummary } from "@/types";
 import { RetroMoodAvatar } from "@/components/retro/RetroMoodAvatar";
+import { usePrivacy } from "@/context/PrivacyContext";
 
 interface MonthlySummaryCardProps {
   summary: MonthlySummary;
 }
 
 export function MonthlySummaryCard({ summary }: MonthlySummaryCardProps) {
+  const { isPrivacyMode, togglePrivacyMode } = usePrivacy();
   const monthName = getMonthName(summary.month);
   const isSurplus = summary.netBalance >= 0;
 
@@ -37,10 +39,25 @@ export function MonthlySummaryCard({ summary }: MonthlySummaryCardProps) {
 
       {/* Top Header */}
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[11px] font-medium text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-          <Wallet className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Saldo {monthName} {summary.year}</span>
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] font-medium text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <Wallet className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Saldo {monthName} {summary.year}</span>
+          </span>
+          <button
+            type="button"
+            onClick={togglePrivacyMode}
+            title={isPrivacyMode ? "Tampilkan nominal" : "Sembunyikan nominal (Mode Privasi)"}
+            aria-label={isPrivacyMode ? "Tampilkan nominal" : "Sembunyikan nominal"}
+            className="p-1 rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition-colors active:scale-95"
+          >
+            {isPrivacyMode ? (
+              <EyeOff className="w-3.5 h-3.5 text-emerald-400" />
+            ) : (
+              <Eye className="w-3.5 h-3.5" />
+            )}
+          </button>
+        </div>
         <div className="flex items-center gap-1.5">
           <RetroMoodAvatar mood={summary.financialMood} size="sm" />
           <span
@@ -55,10 +72,14 @@ export function MonthlySummaryCard({ summary }: MonthlySummaryCardProps) {
       <div className="my-3">
         <h3
           className={`text-2xl font-bold font-pixel tracking-tight ${
-            isSurplus ? "text-emerald-400" : "text-rose-400"
+            isPrivacyMode
+              ? "text-slate-200"
+              : isSurplus
+              ? "text-emerald-400"
+              : "text-rose-400"
           }`}
         >
-          {formatIDR(summary.netBalance)}
+          {isPrivacyMode ? "Rp ******" : formatIDR(summary.netBalance)}
         </h3>
         <span className="text-[10px] text-slate-400 block mt-0.5">
           {summary.transactionCount} transaksi tercatat bulan ini
@@ -73,8 +94,8 @@ export function MonthlySummaryCard({ summary }: MonthlySummaryCardProps) {
           </div>
           <div>
             <span className="text-[10px] text-slate-400 block leading-tight">Pemasukan</span>
-            <span className="text-xs font-bold text-slate-100 leading-tight">
-              {formatIDR(summary.totalIncome)}
+            <span className="text-xs font-bold text-slate-100 leading-tight font-pixel">
+              {isPrivacyMode ? "Rp ******" : formatIDR(summary.totalIncome)}
             </span>
           </div>
         </div>
@@ -85,8 +106,8 @@ export function MonthlySummaryCard({ summary }: MonthlySummaryCardProps) {
           </div>
           <div>
             <span className="text-[10px] text-slate-400 block leading-tight">Pengeluaran</span>
-            <span className="text-xs font-bold text-slate-100 leading-tight">
-              {formatIDR(summary.totalExpenses)}
+            <span className="text-xs font-bold text-slate-100 leading-tight font-pixel">
+              {isPrivacyMode ? "Rp ******" : formatIDR(summary.totalExpenses)}
             </span>
           </div>
         </div>
