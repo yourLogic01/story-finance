@@ -9,6 +9,8 @@ import { TodayTransactionList } from "@/components/cashflow/TodayTransactionList
 import { MonthlySummaryCard } from "@/components/cashflow/MonthlySummaryCard";
 import { CategoryBreakdown } from "@/components/cashflow/CategoryBreakdown";
 import { SelfRewardMeter } from "@/components/budget/SelfRewardMeter";
+import { calculateSafeDailySpend } from "@/lib/cashflow/safeDailySpend";
+import { BudgetWithSpending } from "@/app/actions/budgets";
 import {
   Category,
   TransactionWithCategory,
@@ -30,6 +32,7 @@ interface DashboardViewProps {
   gamification: GamificationProfile | null;
   isNoSpendToday?: boolean;
   wishlistSummary?: WishlistSummaryData | null;
+  budgets?: BudgetWithSpending[];
 }
 
 export function DashboardView({
@@ -40,10 +43,17 @@ export function DashboardView({
   gamification,
   isNoSpendToday = false,
   wishlistSummary,
+  budgets = [],
 }: DashboardViewProps) {
   const router = useRouter();
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isNoSpendLoading, setIsNoSpendLoading] = useState(false);
+
+  const safeDailySpendData = calculateSafeDailySpend({
+    monthlySummary,
+    todayTransactions,
+    budgets,
+  });
 
   const handleTransactionSuccess = () => {
     router.refresh();
@@ -78,8 +88,11 @@ export function DashboardView({
       />
 
       <main className="flex-1 p-4 space-y-4 max-w-md mx-auto w-full pb-24">
-        {/* Monthly Summary Card (T029) */}
-        <MonthlySummaryCard summary={monthlySummary} />
+        {/* Monthly Summary Card with Integrated Safe Daily Spend */}
+        <MonthlySummaryCard
+          summary={monthlySummary}
+          safeDailySpend={safeDailySpendData}
+        />
 
         {/* Guilt-Free Self-Reward Meter (T040) */}
         <SelfRewardMeter allowance={selfRewardAllowance} />

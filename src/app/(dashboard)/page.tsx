@@ -3,7 +3,7 @@ import { DashboardView } from "@/components/cashflow/DashboardView";
 import { Category, TransactionWithCategory, GamificationProfile } from "@/types";
 import { getTodayDateString, getCurrentMonthYear } from "@/lib/utils/date";
 import { getMonthlySummary } from "@/app/actions/summary";
-import { getSelfRewardAllowance } from "@/app/actions/budgets";
+import { getSelfRewardAllowance, getBudgets } from "@/app/actions/budgets";
 import { isTodayNoSpend } from "@/app/actions/no-spend";
 import { getWishlistData } from "@/app/actions/wishlist";
 import { redirect } from "next/navigation";
@@ -31,6 +31,7 @@ export default async function DashboardPage() {
     { data: gamification },
     isNoSpendToday,
     wishlistSummary,
+    budgetsData,
   ] = await Promise.all([
     supabase
       .from("categories")
@@ -51,6 +52,7 @@ export default async function DashboardPage() {
       .maybeSingle(),
     isTodayNoSpend(),
     getWishlistData(),
+    getBudgets(year, month),
   ]);
 
   const categories = (rawCategories || []) as Category[];
@@ -65,6 +67,7 @@ export default async function DashboardPage() {
       gamification={gamification as GamificationProfile | null}
       isNoSpendToday={isNoSpendToday}
       wishlistSummary={wishlistSummary}
+      budgets={budgetsData.budgets}
     />
   );
 }
